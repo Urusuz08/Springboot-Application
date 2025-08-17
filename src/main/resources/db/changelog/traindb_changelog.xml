@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1" author="Urus">
+            <createTable tableName="stations">
+                <column name="code" type="varchar(10)">
+                    <constraints primaryKey="true" nullable="false"/>
+                </column>
+                <column name="name" type="varchar(255)">
+                    <constraints unique="true" nullable="false"/>
+                </column>
+                <column name="place" type="varchar(255)">
+                    <constraints nullable="false"/>
+                </column>
+                <column name="state" type="varchar(255)">
+                    <constraints nullable="false"/>
+                </column>
+            </createTable>
+    </changeSet>
+    <changeSet id="2" author="Urus">
+        <createTable tableName="trains">
+            <column name="train_id" type="varchar(10)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="type" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_station_code" type="varchar(10)">
+                <constraints foreignKeyName="fk_source_station" references="stations(code)" nullable="false"/>
+            </column>
+            <column name="destination_station_code" type="varchar(10)">
+                <constraints foreignKeyName="fk_destination_station" references="stations(code)" nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="3" author="Urus">
+        <createTable tableName="train_route">
+            <column name="route_id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="train_id" type="varchar(10)">
+                <constraints foreignKeyName="fk_train" references="trains(train_id)" nullable="false"/>
+            </column>
+            <column name="station_code" type="varchar(10)">
+                <constraints foreignKeyName="fk_station" references="stations(code)" nullable="false"/>
+            </column>
+            <column name="sequence" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="arrival_time" type="time">
+                <constraints nullable="false"/>
+            </column>
+            <column name="departure_time" type="time">
+                <constraints nullable="false"/>
+            </column>
+            <column name="distance" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="train_route"
+                             columnNames="train_id,sequence"
+                             constraintName="uk_train_sequence"/>
+    </changeSet>
+</databaseChangeLog>
