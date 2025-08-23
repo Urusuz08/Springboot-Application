@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 @Service
 @Transactional
 public class UserService {
-
+    
     @Qualifier("user")
     @Autowired
     private user userRepository; // Fixed: Use interface name, not lowercase
