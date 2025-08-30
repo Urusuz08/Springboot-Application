@@ -14,7 +14,7 @@ import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.JpaTransactionManager;
-//import org.springframework.orm.jpa.EntityManagerFactoryBuilder;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 
 
@@ -38,8 +38,14 @@ public class UserDataSourceConfig {
     }
 
     @Bean
+    public EntityManagerFactoryBuilder userEntityManagerFactoryBuilder() {
+        return new EntityManagerFactoryBuilder(new HibernateJpaVendorAdapter(),
+                new java.util.HashMap<>(), null);
+    }
+
+    @Bean
     public LocalContainerEntityManagerFactoryBean userEntityManagerFactory(
-            EntityManagerFactoryBuilder builder,
+            @Qualifier("userEntityManagerFactoryBuilder") EntityManagerFactoryBuilder builder,
             @Qualifier("userDataSource") DataSource dataSource) {
         return builder
             .dataSource(dataSource)

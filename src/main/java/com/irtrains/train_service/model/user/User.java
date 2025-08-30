@@ -10,7 +10,7 @@ import jakarta.validation.constraints.NotNull;
 
 //import javax.persistence.*;
 @Entity
-@Table(name="User")
+@Table(name="`users`")
 public class User {
     @Column (nullable=false, unique=true)
     @NotNull(message="Phone number cannot be null.")

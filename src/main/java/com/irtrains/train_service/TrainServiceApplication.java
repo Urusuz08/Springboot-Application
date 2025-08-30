@@ -1,10 +1,23 @@
 package com.irtrains.train_service;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
+@EnableTransactionManagement
+@ComponentScan(basePackages = {
+		"com.irtrains.train_service.config",
+		"com.irtrains.train_service.controller",
+		"com.irtrains.train_service.service"
+})
+@EntityScan(basePackages = {
+		"com.irtrains.train_service.model.train",
+		"com.irtrains.train_service.model.user",
+		"com.irtrains.train_service.model.enums"
+})
 public class TrainServiceApplication {
 
 	public static void main(String[] args) {
