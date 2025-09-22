@@ -1,8 +1,8 @@
-package com.irtrains.train_service.service.user;
+package com.irtrains.train_service.service.admin;
 
-import com.irtrains.train_service.model.user.Admin;
+import com.irtrains.train_service.model.admin.Admin;
 import com.irtrains.train_service.repository.enums.Role;
-import com.irtrains.train_service.repository.admin.admin;
+import com.irtrains.train_service.repository.admin.AdminRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,8 +15,10 @@ import java.util.regex.Pattern;
 @Transactional
 public class AdminService {
 
+
+//    @Qualifier("admin")
     @Autowired
-    private admin adminRepository;
+    private AdminRepository adminRepository;
 
     // Email validation pattern
     private static final Pattern EMAIL_PATTERN =

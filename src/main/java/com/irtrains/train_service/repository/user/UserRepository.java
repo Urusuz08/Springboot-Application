@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface user extends JpaRepository<User, String> {
+public interface UserRepository extends JpaRepository<User, String> {
 
     // Find user by phone number
     Optional<User> findByPhone(Long phone);

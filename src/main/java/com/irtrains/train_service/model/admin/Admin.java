@@ -1,5 +1,6 @@
-package com.irtrains.train_service.model.user;
+package com.irtrains.train_service.model.admin;
 
+import com.irtrains.train_service.model.user.User;
 import com.irtrains.train_service.repository.enums.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;

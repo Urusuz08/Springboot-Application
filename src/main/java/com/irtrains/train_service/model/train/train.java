@@ -16,8 +16,8 @@ import jakarta.validation.constraints.NotNull;
 public class train {
     @Id
     @Pattern(
-            regexp = "^[0-9]{5}$",
-            message = "Train code must be in the format of five digits (e.g., 12345)."
+            regexp = "^[A-Z]{5}$",
+            message = "Train code must be in the format of five digits (e.g., VAPI)."
     )
     private String code;
 

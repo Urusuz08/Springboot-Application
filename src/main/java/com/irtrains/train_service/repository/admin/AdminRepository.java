@@ -1,16 +1,15 @@
 package com.irtrains.train_service.repository.admin;
 
-import com.irtrains.train_service.model.user.Admin;
+import com.irtrains.train_service.model.admin.Admin;
 import com.irtrains.train_service.repository.enums.Role;
-import com.irtrains.train_service.repository.user.user;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-@Repository
-public interface admin extends JpaRepository<Admin, Long>{
+@Repository("admin")
+public interface AdminRepository extends JpaRepository<Admin, Long>{
     // Define methods specific to admin operations if needed
     // For example, methods to manage users, view reports, etc.
     // This interface can extend UserRepository or define additional methods

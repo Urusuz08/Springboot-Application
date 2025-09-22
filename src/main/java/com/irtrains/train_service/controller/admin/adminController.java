@@ -1,7 +1,7 @@
 package com.irtrains.train_service.controller.admin;
 
-import com.irtrains.train_service.model.user.Admin;
-import com.irtrains.train_service.service.user.AdminService;
+import com.irtrains.train_service.model.admin.Admin;
+import com.irtrains.train_service.service.admin.AdminService;
 import com.irtrains.train_service.repository.enums.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

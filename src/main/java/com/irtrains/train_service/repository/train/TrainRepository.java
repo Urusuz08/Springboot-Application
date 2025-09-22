@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface trainRepository extends JpaRepository<train, String> {
+public interface TrainRepository extends JpaRepository<train, String> {
 
     // Find trains by state
     List<train> findByState(State state);

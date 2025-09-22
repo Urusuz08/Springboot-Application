@@ -2,7 +2,7 @@ package com.irtrains.train_service.service.user;
 
 import com.irtrains.train_service.model.user.User;
 import com.irtrains.train_service.repository.enums.Role;
-import com.irtrains.train_service.repository.user.user;
+import com.irtrains.train_service.repository.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -16,9 +16,9 @@ import java.util.regex.Pattern;
 @Transactional
 public class UserService {
     
-    @Qualifier("user")
+//    @Qualifier("user")
     @Autowired
-    private user userRepository; // Fixed: Use interface name, not lowercase
+    private UserRepository userRepository; // Fixed: Use interface name, not lowercase
 
     // Email validation pattern
     private static final Pattern EMAIL_PATTERN =

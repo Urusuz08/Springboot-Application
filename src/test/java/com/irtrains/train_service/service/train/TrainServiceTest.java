@@ -2,7 +2,7 @@ package com.irtrains.train_service.service.train;
 
 import com.irtrains.train_service.model.enums.State;
 import com.irtrains.train_service.model.train.train;
-import com.irtrains.train_service.repository.train.trainRepository;
+import com.irtrains.train_service.repository.train.TrainRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,7 +23,7 @@ import static org.mockito.Mockito.*;
 class TrainServiceTest {
 
     @Mock
-    private trainRepository trainRepository;
+    private TrainRepository trainRepository;
 
     @InjectMocks
     private trainService trainService;

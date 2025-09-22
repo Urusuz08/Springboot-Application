@@ -9,19 +9,18 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication
 @EnableTransactionManagement
 @ComponentScan(basePackages = {
-		"com.irtrains.train_service.config",
-		"com.irtrains.train_service.controller",
-		"com.irtrains.train_service.service"
+        "com.irtrains.train_service.config.train",
+        "com.irtrains.train_service.controller.train",
+        "com.irtrains.train_service.service.train"
 })
 @EntityScan(basePackages = {
-		"com.irtrains.train_service.model.train",
-		"com.irtrains.train_service.model.user",
-		"com.irtrains.train_service.model.enums"
+        "com.irtrains.train_service.model.train",
+        "com.irtrains.train_service.model.enums"
 })
 public class TrainServiceApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(TrainServiceApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(TrainServiceApplication.class, args);
+    }
 
 }

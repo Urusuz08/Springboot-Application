@@ -6,6 +6,7 @@ public enum State {
     ASSAM("Assam"),
     BIHAR("Bihar"),
     CHHATTISGARH("Chhattisgarh"),
+    DELHI("Delhi"),
     GOA("Goa"),
     GUJARAT("Gujarat"),
     HARYANA("Haryana"),

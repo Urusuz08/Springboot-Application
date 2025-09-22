@@ -2,7 +2,7 @@ package com.irtrains.train_service.service.train;
 
 import com.irtrains.train_service.model.enums.State;
 import com.irtrains.train_service.model.train.train;
-import com.irtrains.train_service.repository.train.trainRepository;
+import com.irtrains.train_service.repository.train.TrainRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,9 +13,9 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class trainService {
 
-    private final trainRepository trainRepository;
+    private final TrainRepository trainRepository;
 
-    public trainService(trainRepository trainRepository) {
+    public trainService(TrainRepository trainRepository) {
         this.trainRepository = trainRepository;
     }
 
