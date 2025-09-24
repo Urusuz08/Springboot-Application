@@ -67,4 +67,23 @@
                              columnNames="train_id,sequence"
                              constraintName="uk_train_sequence"/>
     </changeSet>
+    <changeSet id="4" author="Urus">
+        <dropAllForeignKeyConstraints baseTableName="trains"/>
+        <dropForeignKeyConstraint baseTableName="train_route" constraintName="fk_station"/>
+        <dropPrimaryKey tableName="stations"/>
+        <addUniqueConstraint tableName="stations" columnNames="code"/>
+        <addNotNullConstraint tableName="stations" columnName="code"/>
+        <addColumn tableName="stations">
+            <column name="ID" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="trains" baseColumnNames="destination_station_code" constraintName="fk_destination_station_new" referencedTableName="stations"
+                                 referencedColumnNames="code" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint baseTableName="train_route" baseColumnNames="station_code" constraintName="fk_station_new" referencedTableName="stations"
+                                 referencedColumnNames="code" onUpdate="CASCADE"/>
+        <addForeignKeyConstraint baseTableName="trains" baseColumnNames="source_station_code"  constraintName="fk_source_station_new" referencedTableName="stations"
+                                 referencedColumnNames="code" onUpdate="CASCADE"/>
+
+    </changeSet>
 </databaseChangeLog>

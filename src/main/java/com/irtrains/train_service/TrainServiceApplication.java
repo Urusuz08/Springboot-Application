@@ -10,11 +10,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @ComponentScan(basePackages = {
         "com.irtrains.train_service.config.train",
-        "com.irtrains.train_service.controller.train",
-        "com.irtrains.train_service.service.train"
+        "com.irtrains.train_service.controller.station",
+        "com.irtrains.train_service.service.station"
 })
 @EntityScan(basePackages = {
-        "com.irtrains.train_service.model.train",
+        "com.irtrains.train_service.model.station",
         "com.irtrains.train_service.model.enums"
 })
 public class TrainServiceApplication {

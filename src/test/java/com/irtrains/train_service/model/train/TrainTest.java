@@ -25,7 +25,7 @@ class TrainTest {
         validator = factory.getValidator();
 
         trainEntity = new train();
-        trainEntity.setCode("12345");
+        trainEntity.setCode("ABCDE"); // valid per regex ^[A-Z]{5}$ in entity
         trainEntity.setName("Rajdhani Express");
         trainEntity.setState(State.MAHARASHTRA);
         trainEntity.setPlace("Mumbai");
@@ -57,7 +57,7 @@ class TrainTest {
     @Test
     @DisplayName("Getters and setters should work")
     void testGettersSetters() {
-        assertEquals("12345", trainEntity.getCode());
+        assertEquals("ABCDE", trainEntity.getCode());
         assertEquals("Rajdhani Express", trainEntity.getName());
         assertEquals(State.MAHARASHTRA, trainEntity.getState());
         assertEquals("Mumbai", trainEntity.getPlace());

@@ -18,7 +18,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @EnableJpaRepositories(
-        basePackages = "com.irtrains.train_service.repository.train",
+        basePackages = "com.irtrains.train_service.repository.station",
         entityManagerFactoryRef = "trainEntityManagerFactory",
         transactionManagerRef = "trainTransactionManager"
 )
@@ -47,7 +47,7 @@ public class TrainDataSourceConfig {
             @Qualifier("trainDataSource") DataSource dataSource) {
         return builder
                 .dataSource(dataSource)
-                .packages("com.irtrains.train_service.model.train") // Adjust package as needed
+                .packages("com.irtrains.train_service.model.station")
                 .persistenceUnit("train")
                 .build();
     }
