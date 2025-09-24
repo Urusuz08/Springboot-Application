@@ -1,43 +1,42 @@
 package com.irtrains.train_service.model.train;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
-import jakarta.persistence.Id;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
-import com.irtrains.train_service.model.enums.State;
+import com.irtrains.train_service.model.enums.Type;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name="stations")
+@Table(name="trains")
 public class train {
     @Id
+    @Column(name="train_id",nullable=false, unique=true, updatable = false)
     @Pattern(
-            regexp = "^[A-Z]{5}$",
-            message = "Train code must be in the format of five digits (e.g., VAPI)."
+            regexp = "^[0-9]{5}$",
+            message = "TrainID must be exactly 5 digits (e.g., 12345)."
     )
-    private String code;
+    private String trainId;
 
     @Column(nullable=false, unique=true)
     private String name;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable=false)
-    @NotNull(message="State cannot be null.")
-    private State state;
+    @NotNull(message="Types cannot be null.")
+    private Type type;
 
-    @Column(nullable=false)
-    private String place;
+    @Column(name="source_station_code",nullable=false)
+    private String sourceStation;
 
-    public String getCode() {
-        return code;
+    @Column(name="destination_station_code",nullable=false)
+    private String destinationStation;
+
+    public String getTrainId() {
+        return trainId;
     }
 
-    public void setCode(String code) {
-        this.code = code;
+    public void setTrainID(String trainId) {
+        this.trainId = trainId;
     }
 
     public String getName() {
@@ -48,20 +47,28 @@ public class train {
         this.name = name;
     }
 
-    public State getState() {
-        return state;
+    public Type getType() {
+        return type;
     }
 
-    public void setState(State state) {
-        this.state = state;
+    public void setType(Type type) {
+        this.type = type;
     }
 
-    public String getPlace() {
-        return place;
+    public String getSourceStation() {
+        return sourceStation;
     }
 
-    public void setPlace(String place) {
-        this.place = place;
+    public void setSourceStation(String sourceStation) {
+        this.sourceStation = sourceStation;
+    }
+
+    public String getDestinationStation() {
+        return destinationStation;
+    }
+
+    public void setDestinationStation(String destinationStation) {
+        this.destinationStation = destinationStation;
     }
 
 

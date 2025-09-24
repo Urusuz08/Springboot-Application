@@ -1,6 +1,6 @@
 package com.irtrains.train_service.repository.train;
 
-import com.irtrains.train_service.model.enums.State;
+import com.irtrains.train_service.model.enums.Type;
 import com.irtrains.train_service.model.train.train;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,51 +12,31 @@ import java.util.Optional;
 
 @Repository
 public interface TrainRepository extends JpaRepository<train, String> {
+    // Primary key is trainId (String) handled by JpaRepository
 
-    // Find trains by state
-    List<train> findByState(State state);
-
-    // Find trains by place/city
-    List<train> findByPlace(String place);
-    List<train> findByPlaceContainingIgnoreCase(String place);
-
-    // Find trains by name (partial search)
-    List<train> findByNameContainingIgnoreCase(String name);
-
-    // Find train by exact name
+    // Lookups by natural unique business keys / attributes
+    Optional<train> findByTrainId(String trainId); // redundant (same as findById) but explicit
     Optional<train> findByName(String name);
 
-    // Check if train exists
+    // Existence checks
+    boolean existsByTrainId(String trainId); // redundant but convenient
     boolean existsByName(String name);
-    boolean existsByCode(String code);
 
-    // Find trains by state and place
-    List<train> findByStateAndPlace(State state, String place);
+    // Attribute based queries
+    List<train> findByType(Type type);
+    List<train> findBySourceStation(String sourceStation);
+    List<train> findByDestinationStation(String destinationStation);
+    List<train> findBySourceStationAndDestinationStation(String sourceStation, String destinationStation);
 
-    // Custom queries for complex searches
-    @Query("SELECT t FROM train t WHERE t.state = :state AND t.place LIKE %:place%")
-    List<train> findTrainsByStateAndPlaceContaining(@Param("state") State state, @Param("place") String place);
+    // Partial text search on name or trainId
+    @Query("SELECT t FROM train t WHERE lower(t.name) LIKE lower(concat('%', :term, '%')) OR t.trainId LIKE concat('%', :term, '%')")
+    List<train> searchByNameOrId(@Param("term") String term);
 
-    @Query("SELECT t FROM train t WHERE t.name LIKE %:searchTerm% OR t.place LIKE %:searchTerm%")
-    List<train> searchTrainsByNameOrPlace(@Param("searchTerm") String searchTerm);
-
-    // Find trains by multiple states
-    @Query("SELECT t FROM train t WHERE t.state IN :states")
-    List<train> findByStateIn(@Param("states") List<State> states);
-
-    // Count trains by state
-    @Query("SELECT COUNT(t) FROM train t WHERE t.state = :state")
-    Long countTrainsByState(@Param("state") State state);
-
-    // Get all unique places for a state
-    @Query("SELECT DISTINCT t.place FROM train t WHERE t.state = :state ORDER BY t.place")
-    List<String> findDistinctPlacesByState(@Param("state") State state);
-
-    // Admin operations
-    @Query("SELECT t FROM train t ORDER BY t.state, t.place, t.name")
-    List<train> findAllOrderedByStateAndPlace();
+    // Fetch all trains running between two stations irrespective of direction
+    @Query("SELECT t FROM train t WHERE (t.sourceStation = :stationA AND t.destinationStation = :stationB) OR (t.sourceStation = :stationB AND t.destinationStation = :stationA)")
+    List<train> findBidirectionalBetween(@Param("stationA") String stationA, @Param("stationB") String stationB);
 
     // Delete operations
-    void deleteByCode(String code);
+    void deleteByTrainId(String trainId); // same as deleteById but explicit
     void deleteByName(String name);
 }
