@@ -1,10 +1,9 @@
 package com.irtrains.train_service.controller.train;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.irtrains.train_service.controller.station.StationController;
-import com.irtrains.train_service.model.enums.State;
-import com.irtrains.train_service.model.station.Station;
-import com.irtrains.train_service.service.station.StationService;
+import com.irtrains.train_service.model.enums.Type;
+import com.irtrains.train_service.model.train.train;
+import com.irtrains.train_service.service.train.trainService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -17,331 +16,225 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("StationController standalone MVC tests")
+@DisplayName("trainController MVC tests")
 class TrainControllerTest {
 
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
 
     @Mock
-    private StationService stationService;
+    private com.irtrains.train_service.service.train.trainService service;
 
     @InjectMocks
-    private StationController controller;
+    private com.irtrains.train_service.controller.train.trainController controller;
 
-    private Station s1;
-    private Station s2;
-    private Station s3;
+    private train t1;
+    private train t2;
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
         objectMapper = new ObjectMapper();
 
-        s1 = new Station("BCT", "Mumbai Central", State.MAHARASHTRA, "Mumbai");
-        s2 = new Station("PUNE", "Pune Junction", State.MAHARASHTRA, "Pune");
-        s3 = new Station("ERS", "Ernakulam Jn", State.KERALA, "Kochi");
+        t1 = new train();
+        t1.setTrainID("12345");
+        t1.setName("Rajdhani Express");
+        t1.setType(Type.RAJDHANI);
+        t1.setSourceStation("BCT");
+        t1.setDestinationStation("NDLS");
+
+        t2 = new train();
+        t2.setTrainID("54321");
+        t2.setName("Shatabdi Express");
+        t2.setType(Type.SHATABDI);
+        t2.setSourceStation("NDLS");
+        t2.setDestinationStation("BCT");
     }
 
     @Nested
-    @DisplayName("CRUD")
-    class Crud {
+    @DisplayName("Create & Update")
+    class CreateUpdate {
         @Test
-        @DisplayName("POST /api/stations creates a station")
-        void createStation() throws Exception {
-            given(stationService.createStation(any(Station.class))).willReturn(s1);
+        @DisplayName("POST /api/trains creates a train")
+        void createTrain() throws Exception {
+            given(service.createTrain(org.mockito.ArgumentMatchers.any(train.class))).willReturn(t1);
 
-            mockMvc.perform(post("/api/stations")
+            mockMvc.perform(post("/api/trains")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(s1)))
+                            .content(objectMapper.writeValueAsString(t1)))
                     .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.code").value("BCT"))
-                    .andExpect(jsonPath("$.name").value("Mumbai Central"))
-                    .andExpect(jsonPath("$.state").value("MAHARASHTRA"))
-                    .andExpect(jsonPath("$.place").value("Mumbai"));
+                    .andExpect(jsonPath("$.trainId").value("12345"))
+                    .andExpect(jsonPath("$.name").value("Rajdhani Express"))
+                    .andExpect(jsonPath("$.type").value("RAJDHANI"))
+                    .andExpect(jsonPath("$.sourceStation").value("BCT"))
+                    .andExpect(jsonPath("$.destinationStation").value("NDLS"));
 
-            verify(stationService, times(1)).createStation(any(Station.class));
+            verify(service).createTrain(org.mockito.ArgumentMatchers.any(train.class));
         }
 
         @Test
-        @DisplayName("PUT /api/stations updates a station")
-        void updateStation() throws Exception {
-            Station updated = new Station("BCT", "Mumbai Central", State.MAHARASHTRA, "Navi Mumbai");
-            given(stationService.updateStation(any(Station.class))).willReturn(updated);
+        @DisplayName("PUT /api/trains/{id} updates a train when id matches body")
+        void updateTrain() throws Exception {
+            when(service.findById("12345")).thenReturn(Optional.of(t1));
+            when(service.updateTrain(org.mockito.ArgumentMatchers.any(train.class))).thenReturn(t1);
 
-            mockMvc.perform(put("/api/stations")
+            mockMvc.perform(put("/api/trains/{id}", "12345")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(updated)))
+                            .content(objectMapper.writeValueAsString(t1)))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.code").value("BCT"))
-                    .andExpect(jsonPath("$.place").value("Navi Mumbai"));
+                    .andExpect(jsonPath("$.trainId").value("12345"));
 
-            verify(stationService, times(1)).updateStation(any(Station.class));
+            verify(service).updateTrain(org.mockito.ArgumentMatchers.any(train.class));
         }
 
         @Test
-        @DisplayName("GET /api/stations/{code} returns a station")
-        void getByCode() throws Exception {
-            given(stationService.findById("BCT")).willReturn(Optional.of(s1));
+        @DisplayName("PUT /api/trains/{id} returns 400 when path/body id mismatch")
+        void updateTrainBadRequestOnIdMismatch() throws Exception {
+            train mismatch = new train();
+            mismatch.setTrainID("00000");
+            mismatch.setName("X");
+            mismatch.setType(Type.OTHER);
+            mismatch.setSourceStation("A");
+            mismatch.setDestinationStation("B");
 
-            mockMvc.perform(get("/api/stations/{code}", "BCT"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.name").value("Mumbai Central"));
-
-            verify(stationService, times(1)).findById("BCT");
-        }
-
-        @Test
-        @DisplayName("DELETE /api/stations/{code} deletes a station")
-        void deleteByCode() throws Exception {
-            doNothing().when(stationService).deleteById("BCT");
-
-            mockMvc.perform(delete("/api/stations/{code}", "BCT"))
-                    .andExpect(status().isOk())
-                    .andExpect(content().string("Station deleted successfully"));
-
-            verify(stationService, times(1)).deleteById("BCT");
+            mockMvc.perform(put("/api/trains/{id}", "12345")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(mismatch)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.message", containsString("trainId in path and body must match")));
         }
     }
 
     @Nested
-    @DisplayName("Reads and queries")
-    class Queries {
+    @DisplayName("Reads & Queries")
+    class Reads {
         @Test
-        @DisplayName("GET /api/stations returns all stations")
-        void getAll() throws Exception {
-            given(stationService.findAll()).willReturn(Arrays.asList(s1, s2, s3));
+        @DisplayName("GET /api/trains/{id} returns a train")
+        void getById() throws Exception {
+            when(service.findById("12345")).thenReturn(Optional.of(t1));
 
-            mockMvc.perform(get("/api/stations"))
+            mockMvc.perform(get("/api/trains/{id}", "12345"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$", hasSize(3)))
-                    .andExpect(jsonPath("$[0].code").value("BCT"))
-                    .andExpect(jsonPath("$[1].code").value("PUNE"))
-                    .andExpect(jsonPath("$[2].code").value("ERS"));
+                    .andExpect(jsonPath("$.name").value("Rajdhani Express"));
 
-            verify(stationService, times(1)).findAll();
+            verify(service).findById("12345");
         }
 
         @Test
-        @DisplayName("GET /api/stations/state/{state} filters by state")
-        void byState() throws Exception {
-            given(stationService.findByState(State.MAHARASHTRA)).willReturn(Arrays.asList(s1, s2));
+        @DisplayName("GET /api/trains/name/{name} returns by name")
+        void getByName() throws Exception {
+            when(service.findByName("Rajdhani Express")).thenReturn(Optional.of(t1));
 
-            mockMvc.perform(get("/api/stations/state/{state}", "MAHARASHTRA"))
+            mockMvc.perform(get("/api/trains/name/{name}", "Rajdhani Express"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$", hasSize(2)))
-                    .andExpect(jsonPath("$[0].state").value("MAHARASHTRA"))
-                    .andExpect(jsonPath("$[1].state").value("MAHARASHTRA"));
-
-            verify(stationService, times(1)).findByState(State.MAHARASHTRA);
+                    .andExpect(jsonPath("$.trainId").value("12345"));
         }
 
         @Test
-        @DisplayName("GET /api/stations/place/{place} filters by place")
-        void byPlace() throws Exception {
-            given(stationService.findByPlace("Mumbai")).willReturn(Collections.singletonList(s1));
+        @DisplayName("GET /api/trains?term= filters by term")
+        void searchByTerm() throws Exception {
+            when(service.searchByNameOrId("raj")).thenReturn(List.of(t1));
 
-            mockMvc.perform(get("/api/stations/place/{place}", "Mumbai"))
+            mockMvc.perform(get("/api/trains").param("term", "raj"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$", hasSize(1)))
-                    .andExpect(jsonPath("$[0].place").value("Mumbai"));
-
-            verify(stationService, times(1)).findByPlace("Mumbai");
+                    .andExpect(jsonPath("$[0].name").value("Rajdhani Express"));
         }
 
         @Test
-        @DisplayName("GET /api/stations/search/place?place= supports partial place match")
-        void searchByPlace() throws Exception {
-            given(stationService.findByPlaceContainingIgnoreCase("mum")).willReturn(Collections.singletonList(s1));
+        @DisplayName("GET /api/trains?source=&destination= filters by route")
+        void filterByRoute() throws Exception {
+            when(service.findBySourceAndDestination("BCT", "NDLS")).thenReturn(List.of(t1));
 
-            mockMvc.perform(get("/api/stations/search/place").param("place", "mum"))
+            mockMvc.perform(get("/api/trains")
+                            .param("source", "BCT")
+                            .param("destination", "NDLS"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$", hasSize(1)))
-                    .andExpect(jsonPath("$[0].place").value("Mumbai"));
-
-            verify(stationService, times(1)).findByPlaceContainingIgnoreCase("mum");
+                    .andExpect(jsonPath("$[0].trainId").value("12345"));
         }
 
         @Test
-        @DisplayName("GET /api/stations/search/name?name= supports partial name match")
-        void searchByName() throws Exception {
-            given(stationService.findByNameContainingIgnoreCase("junction")).willReturn(Arrays.asList(s2));
+        @DisplayName("GET /api/trains?type= filters by type")
+        void filterByType() throws Exception {
+            when(service.findByType(Type.RAJDHANI)).thenReturn(List.of(t1));
 
-            mockMvc.perform(get("/api/stations/search/name").param("name", "junction"))
+            mockMvc.perform(get("/api/trains").param("type", "RAJDHANI"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$[0].type").value("RAJDHANI"));
+        }
+
+        @Test
+        @DisplayName("GET /api/trains/route?from=&to= returns trains")
+        void route() throws Exception {
+            when(service.findBySourceAndDestination("BCT", "NDLS")).thenReturn(List.of(t1));
+
+            mockMvc.perform(get("/api/trains/route")
+                            .param("from", "BCT")
+                            .param("to", "NDLS"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$", hasSize(1)));
-
-            verify(stationService, times(1)).findByNameContainingIgnoreCase("junction");
         }
 
         @Test
-        @DisplayName("GET /api/stations/name/{name} returns exact match by name")
-        void byExactName() throws Exception {
-            given(stationService.findByName("Mumbai Central")).willReturn(Optional.of(s1));
+        @DisplayName("GET /api/trains/between?a=&b= returns bidirectional trains")
+        void between() throws Exception {
+            when(service.findBidirectionalBetween("BCT", "NDLS")).thenReturn(List.of(t1, t2));
 
-            mockMvc.perform(get("/api/stations/name/{name}", "Mumbai Central"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.name").value("Mumbai Central"));
-
-            verify(stationService, times(1)).findByName("Mumbai Central");
-        }
-
-        @Test
-        @DisplayName("GET /api/stations/exists/name/{name} returns existence by name")
-        void existsByName() throws Exception {
-            given(stationService.existsByName("Mumbai Central")).willReturn(true);
-
-            mockMvc.perform(get("/api/stations/exists/name/{name}", "Mumbai Central"))
-                    .andExpect(status().isOk())
-                    .andExpect(content().string("true"));
-
-            verify(stationService, times(1)).existsByName("Mumbai Central");
-        }
-
-        @Test
-        @DisplayName("GET /api/stations/exists/code/{code} returns existence by code")
-        void existsByCode() throws Exception {
-            given(stationService.existsByCode("BCT")).willReturn(true);
-
-            mockMvc.perform(get("/api/stations/exists/code/{code}", "BCT"))
-                    .andExpect(status().isOk())
-                    .andExpect(content().string("true"));
-
-            verify(stationService, times(1)).existsByCode("BCT");
-        }
-
-        @Test
-        @DisplayName("GET /api/stations/state/{state}/place/{place} filters by both")
-        void byStateAndPlace() throws Exception {
-            given(stationService.findByStateAndPlace(State.MAHARASHTRA, "Mumbai"))
-                    .willReturn(Collections.singletonList(s1));
-
-            mockMvc.perform(get("/api/stations/state/{state}/place/{place}", "MAHARASHTRA", "Mumbai"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$", hasSize(1)))
-                    .andExpect(jsonPath("$[0].state").value("MAHARASHTRA"))
-                    .andExpect(jsonPath("$[0].place").value("Mumbai"));
-
-            verify(stationService, times(1)).findByStateAndPlace(State.MAHARASHTRA, "Mumbai");
-        }
-
-        @Test
-        @DisplayName("GET /api/stations/search/state-place?state=&place= supports combined search")
-        void searchByStateAndPlace() throws Exception {
-            given(stationService.findStationsByStateAndPlaceContaining(State.MAHARASHTRA, "Mum"))
-                    .willReturn(Collections.singletonList(s1));
-
-            mockMvc.perform(get("/api/stations/search/state-place")
-                            .param("state", "MAHARASHTRA")
-                            .param("place", "Mum"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$", hasSize(1)));
-
-            verify(stationService, times(1)).findStationsByStateAndPlaceContaining(State.MAHARASHTRA, "Mum");
-        }
-
-        @Test
-        @DisplayName("GET /api/stations/search?searchTerm= global search")
-        void searchGlobal() throws Exception {
-            given(stationService.searchStationsByNameOrPlace("Mumbai"))
-                    .willReturn(Collections.singletonList(s1));
-
-            mockMvc.perform(get("/api/stations/search").param("searchTerm", "Mumbai"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$", hasSize(1)));
-
-            verify(stationService, times(1)).searchStationsByNameOrPlace("Mumbai");
-        }
-
-        @Test
-        @DisplayName("POST /api/stations/states returns by multiple states")
-        void byMultipleStates() throws Exception {
-            List<State> states = Arrays.asList(State.MAHARASHTRA, State.KERALA);
-            given(stationService.findByStateIn(states)).willReturn(Arrays.asList(s1, s3));
-
-            mockMvc.perform(post("/api/stations/states")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(states)))
+            mockMvc.perform(get("/api/trains/between")
+                            .param("a", "BCT")
+                            .param("b", "NDLS"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$", hasSize(2)));
-
-            verify(stationService, times(1)).findByStateIn(states);
         }
 
         @Test
-        @DisplayName("GET /api/stations/count/state/{state} returns count")
-        void countByState() throws Exception {
-            given(stationService.countStationsByState(State.MAHARASHTRA)).willReturn(2L);
+        @DisplayName("GET /api/trains/exists/id/{id} returns existence map")
+        void existsById() throws Exception {
+            when(service.existsByTrainId("12345")).thenReturn(true);
 
-            mockMvc.perform(get("/api/stations/count/state/{state}", "MAHARASHTRA"))
+            mockMvc.perform(get("/api/trains/exists/id/{id}", "12345"))
                     .andExpect(status().isOk())
-                    .andExpect(content().string("2"));
-
-            verify(stationService, times(1)).countStationsByState(State.MAHARASHTRA);
+                    .andExpect(jsonPath("$.trainId").value("12345"))
+                    .andExpect(jsonPath("$.exists").value(true));
         }
 
         @Test
-        @DisplayName("GET /api/stations/places/state/{state} returns distinct places")
-        void distinctPlacesByState() throws Exception {
-            given(stationService.findDistinctPlacesByState(State.MAHARASHTRA))
-                    .willReturn(Arrays.asList("Mumbai", "Pune"));
+        @DisplayName("GET /api/trains/exists/name/{name} returns existence map")
+        void existsByName() throws Exception {
+            when(service.existsByName("Rajdhani Express")).thenReturn(true);
 
-            mockMvc.perform(get("/api/stations/places/state/{state}", "MAHARASHTRA"))
+            mockMvc.perform(get("/api/trains/exists/name/{name}", "Rajdhani Express"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$", hasSize(2)))
-                    .andExpect(jsonPath("$[0]").value("Mumbai"))
-                    .andExpect(jsonPath("$[1]").value("Pune"));
-
-            verify(stationService, times(1)).findDistinctPlacesByState(State.MAHARASHTRA);
+                    .andExpect(jsonPath("$.name").value("Rajdhani Express"))
+                    .andExpect(jsonPath("$.exists").value(true));
         }
+    }
 
+    @Nested
+    @DisplayName("Deletion")
+    class Deletion {
         @Test
-        @DisplayName("GET /api/stations/ordered returns ordered stations")
-        void ordered() throws Exception {
-            given(stationService.findAllOrderedByStateAndPlace()).willReturn(Arrays.asList(s1, s2, s3));
+        @DisplayName("DELETE /api/trains/{id} returns 204 when deleted")
+        void deleteByIdShouldReturn204() throws Exception {
+            when(service.findById("12345")).thenReturn(Optional.of(t1));
 
-            mockMvc.perform(get("/api/stations/ordered"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$", hasSize(3)));
+            mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete("/api/trains/{id}", "12345"))
+                    .andExpect(status().isNoContent());
 
-            verify(stationService, times(1)).findAllOrderedByStateAndPlace();
-        }
-
-        @Test
-        @DisplayName("DELETE /api/stations/code/{code} deletes by code (alias)")
-        void deleteByCodeAlias() throws Exception {
-            doNothing().when(stationService).deleteByCode("BCT");
-
-            mockMvc.perform(delete("/api/stations/code/{code}", "BCT"))
-                    .andExpect(status().isOk())
-                    .andExpect(content().string("Station deleted successfully"));
-
-            verify(stationService, times(1)).deleteByCode("BCT");
-        }
-
-        @Test
-        @DisplayName("DELETE /api/stations/name/{name} deletes by name")
-        void deleteByName() throws Exception {
-            doNothing().when(stationService).deleteByName("Mumbai Central");
-
-            mockMvc.perform(delete("/api/stations/name/{name}", "Mumbai Central"))
-                    .andExpect(status().isOk())
-                    .andExpect(content().string("Station deleted successfully"));
-
-            verify(stationService, times(1)).deleteByName("Mumbai Central");
+            verify(service).deleteById("12345");
         }
     }
 }

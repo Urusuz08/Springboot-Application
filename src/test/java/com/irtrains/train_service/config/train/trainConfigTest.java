@@ -6,10 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.test.context.ActiveProfiles;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -19,6 +21,7 @@ import java.sql.SQLException;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringJUnitConfig(trainConfigTest.TestConfig.class)
+@ActiveProfiles("config-test")
 @DisplayName("Train Config Test Configuration Tests")
 public class trainConfigTest {
 
@@ -29,6 +32,7 @@ public class trainConfigTest {
     private JdbcTemplate jdbcTemplate;
 
     @TestConfiguration
+    @Profile("config-test")
     static class TestConfig {
         @Bean
         @Primary

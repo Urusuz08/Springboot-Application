@@ -1,65 +1,69 @@
 package com.irtrains.train_service.model.train;
 
-import com.irtrains.train_service.model.enums.State;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
+import com.irtrains.train_service.model.enums.Type;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DisplayName("Train Entity Tests")
+@DisplayName("Train Entity Validation Tests")
 class TrainTest {
 
     private Validator validator;
-    private train trainEntity;
+    private train t;
 
     @BeforeEach
     void setUp() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
 
-        trainEntity = new train();
-        trainEntity.setCode("ABCDE"); // valid per regex ^[A-Z]{5}$ in entity
-        trainEntity.setName("Rajdhani Express");
-        trainEntity.setState(State.MAHARASHTRA);
-        trainEntity.setPlace("Mumbai");
+        t = new train();
+        t.setTrainID("12345"); // valid 5-digit per @Pattern
+        t.setName("Rajdhani Express");
+        t.setType(Type.RAJDHANI);
+        t.setSourceStation("BCT");
+        t.setDestinationStation("NDLS");
     }
 
     @Test
-    @DisplayName("Valid train entity should pass validation")
-    void testValidTrain() {
-        Set<ConstraintViolation<train>> violations = validator.validate(trainEntity);
-        assertTrue(violations.isEmpty());
+    @DisplayName("Valid train passes bean validation")
+    void validTrain() {
+        Set<ConstraintViolation<train>> violations = validator.validate(t);
+        assertTrue(violations.isEmpty(), () -> "Expected no violations, got: " + violations);
     }
 
     @Test
-    @DisplayName("Invalid code should fail validation")
-    void testInvalidCode() {
-        trainEntity.setCode("12A45");
-        Set<ConstraintViolation<train>> violations = validator.validate(trainEntity);
+    @DisplayName("Invalid trainId (not 5 digits) fails validation")
+    void invalidTrainId() {
+        t.setTrainID("12A45");
+        Set<ConstraintViolation<train>> violations = validator.validate(t);
         assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("trainId")));
     }
 
     @Test
-    @DisplayName("Null state should fail validation")
-    void testNullState() {
-        trainEntity.setState(null);
-        Set<ConstraintViolation<train>> violations = validator.validate(trainEntity);
+    @DisplayName("Null type fails validation due to @NotNull")
+    void nullType() {
+        t.setType(null);
+        Set<ConstraintViolation<train>> violations = validator.validate(t);
         assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("type")));
     }
 
     @Test
-    @DisplayName("Getters and setters should work")
-    void testGettersSetters() {
-        assertEquals("ABCDE", trainEntity.getCode());
-        assertEquals("Rajdhani Express", trainEntity.getName());
-        assertEquals(State.MAHARASHTRA, trainEntity.getState());
-        assertEquals("Mumbai", trainEntity.getPlace());
+    @DisplayName("Getters return assigned values")
+    void getters() {
+        assertEquals("12345", t.getTrainId());
+        assertEquals("Rajdhani Express", t.getName());
+        assertEquals(Type.RAJDHANI, t.getType());
+        assertEquals("BCT", t.getSourceStation());
+        assertEquals("NDLS", t.getDestinationStation());
     }
 }

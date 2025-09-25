@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class TrainServiceApplication {
 
     public static void main(String[] args) {
+
         SpringApplication.run(TrainServiceApplication.class, args);
     }
 
