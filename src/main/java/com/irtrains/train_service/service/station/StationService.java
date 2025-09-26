@@ -1,17 +1,27 @@
 package com.irtrains.train_service.service.station;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.irtrains.train_service.model.enums.State;
 import com.irtrains.train_service.model.station.Station;
 import com.irtrains.train_service.repository.station.StationRepository;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
-public class StationService {
+public class  StationService {
 
     private final StationRepository stationRepository;
 
@@ -21,6 +31,39 @@ public class StationService {
 
     @Transactional
     public Station createStation(Station s) { return stationRepository.save(s); }
+
+    @Transactional
+    public List<Station> createStationsFromJson(InputStream inputStream) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        TypeReference<List<Station>> typeReference = new TypeReference<List<Station>>(){};
+        List<Station> stations = mapper.readValue(inputStream, typeReference);
+        return stationRepository.saveAll(stations);
+    }
+
+    @Transactional
+    public List<Station> createStationsFromCsv(InputStream inputStream) throws IOException {
+
+        CSVFormat csvFormat = CSVFormat.Builder.create(CSVFormat.DEFAULT)
+                .setHeader() // This indicates the first record is the header.
+                .setIgnoreHeaderCase(true)
+                .setTrim(true)
+                .build();
+
+        try (Reader reader = new InputStreamReader(inputStream);
+             CSVParser csvParser =  new CSVParser(reader, csvFormat)) {
+
+            List<Station> stations = new ArrayList<>();
+            for (CSVRecord csvRecord : csvParser) {
+                Station station = new Station();
+                station.setCode(csvRecord.get("code"));
+                station.setName(csvRecord.get("name"));
+                station.setState(State.valueOf(csvRecord.get("state").toUpperCase()));
+                station.setPlace(csvRecord.get("place"));
+                stations.add(station);
+            }
+            return stationRepository.saveAll(stations);
+        }
+    }
 
     @Transactional
     public Station updateStation(Station s) { return stationRepository.save(s); }

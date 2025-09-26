@@ -86,4 +86,171 @@
                                  referencedColumnNames="code" onUpdate="CASCADE"/>
 
     </changeSet>
+    <changeSet id="5" author="Urus">
+        <createTable tableName="bookings">
+            <column name="booking_id" autoIncrement="true" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="pnr_number" type="varchar(20)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contact_number" type="varchar(15)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="train_id" type="varchar(10)">
+                <constraints foreignKeyName="fk_booking_train" references="trains(train_id)" nullable="false"/>
+            </column>
+            <column name="source_station_code" type="varchar(10)">
+                <constraints foreignKeyName="fk_booking_source_station" references="stations(code)" nullable="false"/>
+            </column>
+            <column name="destination_station_code" type="varchar(10)">
+                <constraints foreignKeyName="fk_booking_destination_station" references="stations(code)" nullable="false"/>
+            </column>
+            <column name="journey_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="booking_date" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(20)" defaultValue="CNF">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_fare" type="decimal(10,2)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="6" author="Urus">
+        <createTable tableName="passengers">
+            <column name="passenger_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="booking_id" type="bigint">
+                <constraints foreignKeyName="fk_passenger_booking" references="bookings(booking_id)" nullable="false"/>
+            </column>
+            <column name="passenger_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="age" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="gender" type="varchar(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="seat_number" type="varchar(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="seat_status" type="varchar(20)" defaultValue="CNF">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="7" author="Urus">
+        <createTable tableName="train_availability">
+            <column name="availability_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="train_id" type="varchar(10)">
+                <constraints foreignKeyName="fk_availability_train" references="trains(train_id)" nullable="false"/>
+            </column>
+            <column name="journey_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="seat_class" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_seats" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="available_seats" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addUniqueConstraint tableName="train_availability" columnNames="train_id, journey_date, seat_class"
+                             constraintName="uk_train_date_class"/>
+    </changeSet>
+        <changeSet id="8" author="Urus">
+            <!-- Drop and recreate foreign keys for 'bookings' table with CASCADE -->
+            <dropForeignKeyConstraint baseTableName="bookings" constraintName="fk_booking_train"/>
+            <addForeignKeyConstraint baseTableName="bookings"
+                                     baseColumnNames="train_id"
+                                     constraintName="fk_booking_train"
+                                     referencedTableName="trains"
+                                     referencedColumnNames="train_id"
+                                     onDelete="CASCADE"
+                                     onUpdate="CASCADE"/>
+
+            <dropForeignKeyConstraint baseTableName="bookings" constraintName="fk_booking_source_station"/>
+            <addForeignKeyConstraint baseTableName="bookings"
+                                     baseColumnNames="source_station_code"
+                                     constraintName="fk_booking_source_station"
+                                     referencedTableName="stations"
+                                     referencedColumnNames="code"
+                                     onDelete="CASCADE"
+                                     onUpdate="CASCADE"/>
+
+            <dropForeignKeyConstraint baseTableName="bookings" constraintName="fk_booking_destination_station"/>
+            <addForeignKeyConstraint baseTableName="bookings"
+                                     baseColumnNames="destination_station_code"
+                                     constraintName="fk_booking_destination_station"
+                                     referencedTableName="stations"
+                                     referencedColumnNames="code"
+                                     onDelete="CASCADE"
+                                     onUpdate="CASCADE"/>
+
+            <!-- Drop and recreate foreign key for 'passengers' table with CASCADE -->
+            <dropForeignKeyConstraint baseTableName="passengers" constraintName="fk_passenger_booking"/>
+            <addForeignKeyConstraint baseTableName="passengers"
+                                     baseColumnNames="booking_id"
+                                     constraintName="fk_passenger_booking"
+                                     referencedTableName="bookings"
+                                     referencedColumnNames="booking_id"
+                                     onDelete="CASCADE"
+                                     onUpdate="CASCADE"/>
+
+            <!-- Drop and recreate foreign key for 'train_availability' table with CASCADE -->
+            <dropForeignKeyConstraint baseTableName="train_availability" constraintName="fk_availability_train"/>
+            <addForeignKeyConstraint baseTableName="train_availability"
+                                     baseColumnNames="train_id"
+                                     constraintName="fk_availability_train"
+                                     referencedTableName="trains"
+                                     referencedColumnNames="train_id"
+                                     onDelete="CASCADE"
+                                     onUpdate="CASCADE"/>
+        </changeSet>
+
+        <changeSet id="9" author="Urus">
+            <!-- Drop and recreate foreign keys for 'trains' table with CASCADE -->
+            <dropForeignKeyConstraint baseTableName="trains" constraintName="fk_destination_station_new"/>
+            <addForeignKeyConstraint baseTableName="trains"
+                                     baseColumnNames="destination_station_code"
+                                     constraintName="fk_destination_station_new"
+                                     referencedTableName="stations"
+                                     referencedColumnNames="code"
+                                     onDelete="CASCADE"
+                                     onUpdate="CASCADE"/>
+
+            <dropForeignKeyConstraint baseTableName="trains" constraintName="fk_source_station_new"/>
+            <addForeignKeyConstraint baseTableName="trains"
+                                     baseColumnNames="source_station_code"
+                                     constraintName="fk_source_station_new"
+                                     referencedTableName="stations"
+                                     referencedColumnNames="code"
+                                     onDelete="CASCADE"
+                                     onUpdate="CASCADE"/>
+        </changeSet>
+    <changeSet id="10" author="Urus">
+        <dropUniqueConstraint tableName="trains" uniqueColumns="name" constraintName="trains_name_key"/>
+    </changeSet>
 </databaseChangeLog>

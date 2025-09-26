@@ -77,7 +77,7 @@ class TrainRepositoryTest {
 
     @Test
     void searchByNameOrIdAndDelete() {
-        train a = make("33333", "Kerala Express", Type.EXPRES, "ERS", "SBC");
+        train a = make("33333", "Kerala Express", Type.EXPRESS, "ERS", "SBC");
         em.persistAndFlush(a);
 
         assertEquals(1, repo.searchByNameOrId("Ker").size());

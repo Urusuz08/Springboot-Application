@@ -7,8 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
+import java.io.IOException;
 import java.util.*;
 
 @RestController
@@ -48,6 +50,31 @@ public class trainController {
             return error(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
         } catch (Exception ex) {
             return error(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error creating train", ex);
+        }
+    }
+
+    @PostMapping("/bulk-create")
+    public ResponseEntity<?> bulkCreateTrains(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return error(HttpStatus.BAD_REQUEST, "File is empty", null);
+        }
+
+        String filename = file.getOriginalFilename();
+        try {
+            List<train> trains;
+            if (filename != null && filename.toLowerCase().endsWith(".json")) {
+                trains = trainService.createTrainsFromJson(file.getInputStream());
+            } else if (filename != null && filename.toLowerCase().endsWith(".csv")) {
+                trains = trainService.createTrainsFromCsv(file.getInputStream());
+            } else {
+                return error(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Unsupported file type. Please upload a .json or .csv file.", null);
+            }
+            return ResponseEntity.status(HttpStatus.CREATED).body(trains);
+        } catch (IOException e) {
+            return error(HttpStatus.BAD_REQUEST, "Failed to parse the uploaded file.", e);
+        } catch (Exception e) {
+//            e.printStackTrace();
+            return error(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred during bulk creation.", e);
         }
     }
 

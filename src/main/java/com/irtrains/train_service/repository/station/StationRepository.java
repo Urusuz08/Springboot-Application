@@ -3,7 +3,7 @@ package com.irtrains.train_service.repository.station;
 import com.irtrains.train_service.model.enums.State;
 import com.irtrains.train_service.model.station.Station;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 

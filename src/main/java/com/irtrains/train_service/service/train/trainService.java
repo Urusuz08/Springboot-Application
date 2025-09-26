@@ -1,12 +1,22 @@
 package com.irtrains.train_service.service.train;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.irtrains.train_service.model.enums.Type;
 import com.irtrains.train_service.model.train.train;
 import com.irtrains.train_service.repository.train.TrainRepository;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,6 +45,41 @@ public class trainService {
             throw new IllegalArgumentException("Train constraints violated (duplicate id or name)", ex);
         }
     }
+
+    @Transactional
+    public List<train> createTrainsFromJson(InputStream inputStream) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        TypeReference<List<train>> typeReference = new TypeReference<List<train>>(){};
+        List<train> trains = mapper.readValue(inputStream, typeReference);
+        return trainRepository.saveAll(trains);
+    }
+
+        @Transactional
+        public List<train> createTrainsFromCsv(InputStream inputStream) throws IOException {
+            // Use CSVFormat.Builder to construct the format, as withFirstRecordAsHeader() is deprecated.
+            CSVFormat csvFormat = CSVFormat.Builder.create(CSVFormat.DEFAULT)
+                    .setHeader() // This indicates the first record is the header.
+                    .setIgnoreHeaderCase(true)
+                    .setTrim(true)
+                    .build();
+
+            try (Reader reader = new InputStreamReader(inputStream);
+                 CSVParser csvParser = new CSVParser(reader, csvFormat)) {
+
+                List<train> trains = new ArrayList<>();
+                for (CSVRecord csvRecord : csvParser) {
+                    train t = new train();
+                    // Corrected the typo from "triainid" to "trainId"
+                    t.setTrainID(csvRecord.get("trainid"));
+                    t.setName(csvRecord.get("name"));
+                    t.setType(Type.valueOf(csvRecord.get("type").toUpperCase()));
+                    t.setSourceStation(csvRecord.get("sourceStation"));
+                    t.setDestinationStation(csvRecord.get("destinationStation"));
+                    trains.add(t);
+                }
+                return trainRepository.saveAll(trains);
+            }
+        }
 
     /* ===================== Update ===================== */
     @Transactional

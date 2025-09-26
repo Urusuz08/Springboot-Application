@@ -5,7 +5,7 @@ public enum Type {
     SHATABDI("Shatabdi"),
     DURONTO("Duronto"),
     SF_EXPRESS("Superfast Express"),
-    EXPRES("Express"),
+    EXPRESS("Express"),
     PASSENGER("Passenger"),
     SHUTTLE("Shuttle"),
     LOCAL("Local"),

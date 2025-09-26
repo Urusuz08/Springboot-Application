@@ -6,9 +6,10 @@ import com.irtrains.train_service.service.station.StationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/stations")
@@ -16,6 +17,20 @@ import java.util.Optional;
 public class StationController {
 
     private final StationService stationService;
+
+    private <T> ResponseEntity<T> notFound(String msg) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
+    private ResponseEntity<Map<String, Object>> error(HttpStatus status, String message, Exception ex) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", new Date());
+        body.put("status", status.value());
+        body.put("error", status.getReasonPhrase());
+        body.put("message", message);
+        if (ex != null) body.put("detail", ex.getMessage());
+        return ResponseEntity.status(status).body(body);
+    }
 
     public StationController(StationService stationService) {
         this.stationService = stationService;
@@ -29,6 +44,29 @@ public class StationController {
             return new ResponseEntity<>(created, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/bulk-create")
+    public ResponseEntity<?> bulkCreateStations(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        String filename = file.getOriginalFilename();
+        try {
+            List<Station> stations;
+            if (filename != null && filename.toLowerCase().endsWith(".json")) {
+                stations = stationService.createStationsFromJson(file.getInputStream());
+            } else if (filename != null && filename.toLowerCase().endsWith(".csv")) {
+                stations = stationService.createStationsFromCsv(file.getInputStream());
+            } else {
+                return new ResponseEntity<>(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+            }
+            return new ResponseEntity<>(stations, HttpStatus.CREATED);
+        } catch (Exception e) {
+//            e.printStackTrace();
+            return error(HttpStatus.INTERNAL_SERVER_ERROR, "Error processing file", e);
         }
     }
 

@@ -12,7 +12,7 @@ public class Station {
     @Id
     @Column(name = "code", nullable = false, length = 10)
     @Pattern(
-            regexp = "^[A-Z]{3,5}$",
+            regexp = "^[A-Z]{1,5}$",
             message = "Station code must be 2-5 uppercase letters (e.g., VAPI)."
     )
     private String code;
