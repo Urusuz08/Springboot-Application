@@ -253,4 +253,42 @@
     <changeSet id="10" author="Urus">
         <dropUniqueConstraint tableName="trains" uniqueColumns="name" constraintName="trains_name_key"/>
     </changeSet>
+
+    <changeSet id="11" author="Urus">
+        <sql>
+            ALTER TABLE train_availability ALTER COLUMN last_updated DROP DEFAULT;
+        </sql>
+        <sql>
+            ALTER TABLE train_availability
+            ALTER COLUMN last_updated TYPE BIGINT
+        USING EXTRACT(EPOCH FROM last_updated)::bigint;
+        </sql>
+
+        <addColumn tableName="passengers">
+            <column name="coach_type" type="varchar(50)"/>
+            <column name="coach_number" type="bigint"/>
+            <column name="berth_type" type="varchar(50)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="12" author="Urus">
+        <createTable tableName="train_coaches">
+            <column name="coach_id" type="bigint">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="train_id" type="varchar(10)">
+                <constraints foreignKeyName="fk_coach_train" references="trains(train_id)" nullable="false"/>
+            </column>
+            <column name="coach_type" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_available_seats" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="coach_number" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>
