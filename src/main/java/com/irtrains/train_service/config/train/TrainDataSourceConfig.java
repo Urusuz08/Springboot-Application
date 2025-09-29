@@ -22,7 +22,11 @@ import org.springframework.transaction.PlatformTransactionManager;
         basePackages = {
                 // Include BOTH station and train repositories
                 "com.irtrains.train_service.repository.station",
-                "com.irtrains.train_service.repository.train"
+                "com.irtrains.train_service.repository.train",
+                "com.irtrains.train_service.repository.seatAvailabilityRepository",
+                "com.irtrains.train_service.repository.train_coach",
+                "com.irtrains.train_service.repository.Booking",
+                "com.irtrains.train_service.repository.passenger"
         },
         entityManagerFactoryRef = "trainEntityManagerFactory",
         transactionManagerRef = "trainTransactionManager"
@@ -62,7 +66,11 @@ public class TrainDataSourceConfig {
                 .packages(
                         "com.irtrains.train_service.model.station",
                         "com.irtrains.train_service.model.train",
-                        "com.irtrains.train_service.model.enums"
+                        "com.irtrains.train_service.model.enums",
+                        "com.irtrains.train_service.model.trainSeatAvailability",
+                        "com.irtrains.train_service.model.train_coaches",
+                        "com.irtrains.train_service.model.booking",
+                        "com.irtrains.train_service.model.passenger"
                 )
                 .persistenceUnit("train")
                 .build();

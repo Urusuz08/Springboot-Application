@@ -80,7 +80,7 @@ public class TrainCoachController {
     @GetMapping("/{coachId}")
     public ResponseEntity<?> getTrainCoachById(@PathVariable Integer coachId) {
         try {
-            Optional<train_coaches> trainCoach = trainCoachService.getTrainCoachById(coachId);
+            Optional<train_coaches> trainCoach = trainCoachService.getcoachById(coachId);
             return trainCoach.map(ResponseEntity::ok)
                     .orElse(notFound("Train coach not found with ID: " + coachId));
         } catch (Exception e) {
@@ -88,18 +88,18 @@ public class TrainCoachController {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<?> getAllTrainCoaches() {
-        try {
-            List<train_coaches> trainCoaches = trainCoachService.getAllTrainCoaches();
-            if (trainCoaches.isEmpty()) {
-                return notFound("No train coaches found");
-            }
-            return ResponseEntity.ok(trainCoaches);
-        } catch (Exception e) {
-            return error(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to retrieve train coaches", e);
-        }
-    }
+//    @GetMapping
+//    public ResponseEntity<?> getAllTrainCoaches() {
+//        try {
+//            List<train_coaches> trainCoaches = trainCoachService.getAllTrainCoaches();
+//            if (trainCoaches.isEmpty()) {
+//                return notFound("No train coaches found");
+//            }
+//            return ResponseEntity.ok(trainCoaches);
+//        } catch (Exception e) {
+//            return error(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to retrieve train coaches", e);
+//        }
+//    }
 
     @GetMapping("/type/{coachType}")
     public ResponseEntity<?> getTrainCoachesByCoachType(@PathVariable String coachType) {

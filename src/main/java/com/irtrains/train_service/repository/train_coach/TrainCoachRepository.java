@@ -17,8 +17,8 @@ public interface TrainCoachRepository extends JpaRepository<train_coaches, Integ
 
     Optional<train_coaches> findByTrainIdAndCoachNumber(String trainId, Integer coachNumber);
 
-    Optional<train_coaches> findByTrainCoachId(Integer trainCoachId);
+    Optional<train_coaches> findBycoachId(Integer coachId);
 
-    List<train_coaches> getAllTrainCoaches();
+//    List<train_coaches> getAllTrainCoaches();
 
 }
