@@ -2,6 +2,7 @@ package com.irtrains.train_service.controller.bookings;
 
 import com.irtrains.train_service.model.booking.Booking;
 import com.irtrains.train_service.service.booking.BookingService;
+import com.irtrains.train_service.DTO.BookingInfoDTO;
 
 import com.irtrains.train_service.service.station.StationService;
 import org.springframework.http.HttpStatus;
@@ -38,9 +39,9 @@ public class BookingController {
     }
 
     @PostMapping //Used to create a new booking
-    public ResponseEntity<?> createBooking(@RequestBody Booking booking) {
+    public ResponseEntity<?> createBooking(@RequestBody BookingInfoDTO booking) {
         try {
-            Booking createdBooking = bookingService.createBooking(booking);
+            Booking createdBooking = bookingService.addBooking(booking);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdBooking);
         } catch (Exception e) {
             return error(HttpStatus.BAD_REQUEST, "Failed to create booking", e);

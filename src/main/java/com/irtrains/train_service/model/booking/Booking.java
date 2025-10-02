@@ -45,6 +45,9 @@ public class Booking {
     )
     private String destinationStationCode;
 
+    @Column(name = "coach_type", nullable = false)
+    private String coachType;
+
     @Column(name="journey_date", nullable=false)
     @Temporal(TemporalType.DATE)
     private Date journeyDate; //Over here the datatype Date is imported from the util package.
@@ -144,5 +147,20 @@ public class Booking {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Double getFare() {
+        return fare;
+    }
+    public void setFare(Double fare) {
+        this.fare = fare;
+    }
+
+    public String getCoachType() {
+        return coachType;
+    }
+
+    public void setCoachType(String coachType) {
+        this.coachType = coachType;
     }
 }

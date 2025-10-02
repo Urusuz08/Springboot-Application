@@ -6,64 +6,66 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import java.util.Set;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-@DisplayName("Train Entity Validation Tests")
-class TrainTest {
+public class TrainTest {
 
     private Validator validator;
-    private train t;
+    private train train;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
-
-        t = new train();
-        t.setTrainID("12345"); // valid 5-digit per @Pattern
-        t.setName("Rajdhani Express");
-        t.setType(Type.RAJDHANI);
-        t.setSourceStation("BCT");
-        t.setDestinationStation("NDLS");
+        train = new train();
+        train.setTrainID("12345");
+        train.setName("Test Train");
+        train.setType(Type.EXPRESS);
+        train.setSourceStation("SRC");
+        train.setDestinationStation("DST");
     }
 
     @Test
-    @DisplayName("Valid train passes bean validation")
-    void validTrain() {
-        Set<ConstraintViolation<train>> violations = validator.validate(t);
-        assertTrue(violations.isEmpty(), () -> "Expected no violations, got: " + violations);
+    public void testValidTrain() {
+        Set<ConstraintViolation<train>> violations = validator.validate(train);
+        assertTrue(violations.isEmpty());
     }
 
     @Test
-    @DisplayName("Invalid trainId (not 5 digits) fails validation")
-    void invalidTrainId() {
-        t.setTrainID("12A45");
-        Set<ConstraintViolation<train>> violations = validator.validate(t);
+    public void testTrainIdValidation() {
+        train.setTrainID("123"); // Invalid
+        Set<ConstraintViolation<train>> violations = validator.validate(train);
         assertFalse(violations.isEmpty());
-        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("trainId")));
-    }
+        assertEquals(1, violations.size());
+        assertEquals("TrainID must be exactly 5 digits (e.g., 12345).", violations.iterator().next().getMessage());
 
-    @Test
-    @DisplayName("Null type fails validation due to @NotNull")
-    void nullType() {
-        t.setType(null);
-        Set<ConstraintViolation<train>> violations = validator.validate(t);
+        train.setTrainID("123456"); // Invalid
+        violations = validator.validate(train);
         assertFalse(violations.isEmpty());
-        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("type")));
+
+        train.setTrainID("abcde"); // Invalid
+        violations = validator.validate(train);
+        assertFalse(violations.isEmpty());
     }
 
     @Test
-    @DisplayName("Getters return assigned values")
-    void getters() {
-        assertEquals("12345", t.getTrainId());
-        assertEquals("Rajdhani Express", t.getName());
-        assertEquals(Type.RAJDHANI, t.getType());
-        assertEquals("BCT", t.getSourceStation());
-        assertEquals("NDLS", t.getDestinationStation());
+    public void testTypeNotNull() {
+        train.setType(null);
+        Set<ConstraintViolation<train>> violations = validator.validate(train);
+        assertFalse(violations.isEmpty());
+        assertEquals(1, violations.size());
+        assertEquals("Types cannot be null.", violations.iterator().next().getMessage());
+    }
+
+    @Test
+    public void testGettersAndSetters() {
+        assertEquals("12345", train.getTrainId());
+        assertEquals("Test Train", train.getName());
+        assertEquals(Type.EXPRESS, train.getType());
+        assertEquals("SRC", train.getSourceStation());
+        assertEquals("DST", train.getDestinationStation());
     }
 }
+

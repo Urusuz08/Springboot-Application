@@ -28,11 +28,10 @@ public class passenger {
     )
     private String gender;
 
-    @Column(name = "coach_type", nullable = false)
-    private String coachType; // e.g., SL, 3A, 2A
+     // e.g., SL, 3A, 2A
 
     @Column(name = "coach_number", nullable = false)
-    private String coachNumber;
+    private Integer coachNumber;
 
     @Column(name="seat_number", nullable=false)
     private String seatNumber;
@@ -75,7 +74,7 @@ public class passenger {
         return gender;
     }
 
-    public void setGender(){
+    public void setGender(String gender){
         this.gender=gender;
     }
     public String getSeatNumber() {
@@ -91,19 +90,13 @@ public class passenger {
         this.seatStatus = seatStatus;
     }
 
-    public String getCoachType() {
-        return coachType;
-    }
 
-    public void setCoachType(String coachType) {
-        this.coachType = coachType;
-    }
 
-    public String getCoachNumber() {
+    public Integer getCoachNumber() {
         return coachNumber;
     }
 
-    public void setCoachNumber(String coachNumber) {
+    public void setCoachNumber(Integer coachNumber) {
         this.coachNumber = coachNumber;
     }
 

@@ -1,6 +1,7 @@
 package com.irtrains.train_service.controller.passenger;
 
 import com.irtrains.train_service.model.passenger.passenger;
+import com.irtrains.train_service.model.booking.Booking;
 import com.irtrains.train_service.service.passenger.PassengerService;
 
 import org.springframework.http.*;
@@ -34,10 +35,10 @@ public class PassengerController {
     }
 
     @PostMapping // Used to add a new passenger
-    public ResponseEntity<?> addPassenger(@RequestBody passenger passenger) {
+    public ResponseEntity<?> addPassenger(@RequestBody List<passenger> passenger, List<Booking> existingBookings) {
         try {
-            passenger createdPassenger = passengerService.addPassenger(passenger);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdPassenger);
+            List<passenger> createdPassengers = passengerService.addPassenger(passenger,existingBookings );
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdPassengers);
         } catch (Exception e) {
             return error(HttpStatus.BAD_REQUEST, "Failed to add passenger", e);
         }

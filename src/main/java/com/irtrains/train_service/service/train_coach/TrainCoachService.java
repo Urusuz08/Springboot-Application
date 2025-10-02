@@ -26,6 +26,10 @@ public class TrainCoachService {
         return trainCoachRepository.findByTrainId(trainId);
     }
 
+    public List<train_coaches> getTrainCoachesbyTrainIdandCocahType(String trainId, String coachType) {
+        return trainCoachRepository.findByCoachTypeAndTrainId(coachType, trainId);
+    }
+
 //    public List<train_coaches> getAllTrainCoaches() {
 //        return trainCoachRepository.findAll();
 //    }

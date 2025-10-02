@@ -12,4 +12,8 @@ public interface PassengerRepository extends JpaRepository<passenger, Long> {
 
     List<passenger> findByBookingId(Long bookingId);
 
+    List<passenger> findAllByBookingIdIn(List<Long> bookingIds);
+
+
+
 }
