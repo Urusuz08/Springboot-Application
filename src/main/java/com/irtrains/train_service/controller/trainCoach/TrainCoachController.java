@@ -125,4 +125,17 @@ public class TrainCoachController {
         }
     }
 
+    @GetMapping("/train/{trainId}/type/{coachType}")
+    public ResponseEntity<?> getTrainCoachesByTrainIdAndCoachType(@PathVariable String trainId, @PathVariable String coachType) {
+        try {
+            List<train_coaches> trainCoaches = trainCoachService.getTrainCoachesbyTrainIdandCoachType(trainId, coachType);
+            if (trainCoaches.isEmpty()) {
+                return notFound("No train coaches found for train ID: " + trainId + " and coach type: " + coachType);
+            }
+            return ResponseEntity.ok(trainCoaches);
+        } catch (Exception e) {
+            return error(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to retrieve train coaches", e);
+        }
+    }
+
 }

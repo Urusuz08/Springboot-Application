@@ -26,8 +26,9 @@ public class TrainCoachService {
         return trainCoachRepository.findByTrainId(trainId);
     }
 
-    public List<train_coaches> getTrainCoachesbyTrainIdandCocahType(String trainId, String coachType) {
-        return trainCoachRepository.findByCoachTypeAndTrainId(coachType, trainId);
+    public List<train_coaches> getTrainCoachesbyTrainIdandCoachType(String trainId, String coachType) {
+        List<train_coaches> coachList=trainCoachRepository.findByCoachTypeAndTrainId(coachType, trainId);
+        return coachList==null? new ArrayList<>():coachList;
     }
 
 //    public List<train_coaches> getAllTrainCoaches() {

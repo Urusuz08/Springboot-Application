@@ -7,7 +7,8 @@ import jakarta.persistence.*;
 public class train_coaches {
 
     @Id
-    @Column(name="coach_id", nullable=false, updatable=false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="coach_id" , nullable=false, updatable=false)
     private Integer coachId; // e.g., "SL1", "3A2"
 
     @Column(name="train_id", nullable=false)
@@ -26,7 +27,7 @@ public class train_coaches {
         return coachId;
     }
 
-    public void setCoachId(int coachId) {
+    public void setCoachId(Integer coachId) {
         this.coachId = coachId;
     }
 

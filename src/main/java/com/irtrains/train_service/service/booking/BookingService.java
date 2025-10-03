@@ -37,6 +37,7 @@ public class BookingService {
         newBooking.setFare(booking.getTotalFare());
         newBooking.setContactNumber(booking.getContactNumber());
         newBooking.setEmail(booking.getEmail());
+        newBooking.setCoachType(booking.getCoachType());
         newBooking.setStatus("BOOKED");
 
 
@@ -59,8 +60,10 @@ public class BookingService {
         }
 
 //        PassengerService passengerService = new PassengerService();
-        passengerService.addPassenger(passengerList, existingBookings);
+        if(existingBookings==null) existingBookings=new ArrayList<>();
 
+        passengerService.addPassengerM(passengerList, existingBookings,booking.getTrainId(),booking.getCoachType());
+//fix the persist error in train_coach table, which JPA is unable to do it and because of it we are not able to create the entry in the train_coach table through the api.
         return savedBooking;
     }
     @Transactional

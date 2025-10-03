@@ -59,7 +59,7 @@ public class Booking {
     @Column(name="status", nullable=false)
     private String status; // e.g., CONFIRMED, CANCELLED, PENDING
 
-    @Column(name = "fare", nullable = false)
+    @Column(name = "total_fare", nullable = false)
     private Double fare;
 
     public Long getBookingId() {

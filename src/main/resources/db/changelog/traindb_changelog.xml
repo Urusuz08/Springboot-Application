@@ -300,5 +300,14 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet id="14" author="Urus">
+        <addAutoIncrement tableName="train_coaches" columnName="coach_id"/>
+    </changeSet>
+    <changeSet id="15" author="Uttam Yadav">
+        <dropDefaultValue tableName="train_coaches" columnName="coach_id"/>
+    </changeSet>
+    <changeSet id="16" author="Urus">
+        <addAutoIncrement tableName="train_coaches" columnName="coach_id"/>
+    </changeSet>
 
 </databaseChangeLog>
