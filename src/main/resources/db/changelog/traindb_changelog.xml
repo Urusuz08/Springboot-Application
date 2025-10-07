@@ -309,5 +309,12 @@
     <changeSet id="16" author="Urus">
         <addAutoIncrement tableName="train_coaches" columnName="coach_id"/>
     </changeSet>
+        <changeSet id="17" author="Urus">
+        <addColumn tableName="train_route">
+            <column name="day" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

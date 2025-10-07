@@ -5,20 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.irtrains.train_service.model.enums.Type;
 import com.irtrains.train_service.model.train.train;
 import com.irtrains.train_service.repository.train.TrainRepository;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.csv.*;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.io.*;
+import java.util.*;
 
 /**
  * Service layer for Train aggregate. Provides validation, transactional boundaries and

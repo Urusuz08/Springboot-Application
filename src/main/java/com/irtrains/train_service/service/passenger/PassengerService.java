@@ -6,7 +6,7 @@ import com.irtrains.train_service.repository.passenger.PassengerRepository;
 import com.irtrains.train_service.model.train_coaches.train_coaches;
 import com.irtrains.train_service.service.train_coach.TrainCoachService;
 
-//You have to settle the trainCoachRepository part. Tmrw
+
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.*;
 
@@ -40,6 +40,16 @@ public class PassengerService {
             Arrays.fill(seatArray,0);
             AllocatedSeats.add(seatArray);
         }
+
+        HashMap<Integer,String> bType=new HashMap<>();
+        bType.put(1,"LB");
+        bType.put(2,"MB");
+        bType.put(3,"UB");
+        bType.put(4,"LB");
+        bType.put(5,"MB");
+        bType.put(6,"UB");
+        bType.put(7,"SL");
+        bType.put(0,"SU");
 
         if(existingBookings.size()>0){
 //            Set<Integer> store=new HashSet<>();
@@ -75,6 +85,8 @@ public class PassengerService {
                         for (int k = 0; k < passenger.size(); k++) {
                             int coachNumber = i + 1;
                             int seatNumber = j  + k + 2 - cnt;
+                            String berth= bType.get(seatNumber%8);
+                            passenger.get(k).setBerthType(berth);
                             AllocatedSeats.get(i)[seatNumber - 1] = 1; // Mark seat as booked
                             passenger.get(k).setCoachNumber(coachNumber);
                             passenger.get(k).setSeatNumber(seatNumber + "");
@@ -89,12 +101,13 @@ public class PassengerService {
         int cnt=0;
         if(checker==0) {
             for (int i = 0; i < AllocatedSeats.size(); i++) {
-
                 for (int j = 0; j < AllocatedSeats.get(i).length; j++) {
                     if (AllocatedSeats.get(i)[j] == 0) {
                         int coachNumber = i + 1;
                         int seatNumber = j + 1;
                         AllocatedSeats.get(i)[j] = 1; // Mark seat as booked
+                        String berth= bType.get(seatNumber%8);
+                        passenger.get(cnt).setBerthType(berth);
                         passenger.get(cnt).setCoachNumber(coachNumber);
                         passenger.get(cnt).setSeatNumber(seatNumber + "");
                         passenger.get(cnt).setSeatStatus("CNF");

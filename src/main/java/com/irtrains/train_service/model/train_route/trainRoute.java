@@ -1,0 +1,99 @@
+package com.irtrains.train_service.model.train_route;
+
+import jakarta.persistence.*;
+
+
+@Entity
+@Table(name="train_route")
+public class trainRoute {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="route_id", nullable=false, updatable=false)
+    private Integer routeId;
+
+    @Column(name="train_id", nullable=false)
+    private String trainId;
+
+    @Column(name="station_code", nullable=false)
+    private String stationCode;
+
+    @Column(name="sequence", nullable=false)
+    private Integer sequence; // Order of the station in the route
+
+    @Column(name="arrival_time", nullable=false)
+    private String arrivalTime; // Format: "HH:mm"
+
+    @Column(name="departure_time", nullable=false)
+    private String departureTime; // Format: "HH:mm"
+
+    @Column(name="day", nullable=false)
+    private Integer dayNumber; // e.g., 1 for first day, 2 for second day
+
+    @Column(name="distance", nullable=false)
+    private Integer distanceFromSource; // in kilometers
+
+    public Integer getRouteId() {
+        return routeId;
+    }
+
+    public void setRouteId(Integer routeId) {
+        this.routeId = routeId;
+    }
+
+    public String getTrainId() {
+        return trainId;
+    }
+
+    public void setTrainId(String trainId) {
+        this.trainId = trainId;
+    }
+
+    public String getStationCode() {
+        return stationCode;
+    }
+
+    public void setStationCode(String stationCode) {
+        this.stationCode = stationCode;
+    }
+
+    public Integer getSequence() {
+        return sequence;
+    }
+
+    public void setStationName(Integer sequence) {
+        this.sequence= sequence;
+    }
+
+    public String getArrivalTime() {
+        return arrivalTime;
+    }
+
+    public void setArrivalTime(String arrivalTime) {
+        this.arrivalTime = arrivalTime;
+    }
+
+    public String getDepartureTime() {
+        return departureTime;
+    }
+
+    public void setDepartureTime(String departureTime) {
+        this.departureTime = departureTime;
+    }
+
+    public Integer getDayNumber() {
+        return dayNumber;
+    }
+
+    public void setDayNumber(Integer dayNumber) {
+        this.dayNumber = dayNumber;
+    }
+
+    public Integer getDistanceFromSource() {
+        return distanceFromSource;
+    }
+
+    public void setDistanceFromSource(Integer distanceFromSource) {
+        this.distanceFromSource = distanceFromSource;
+    }
+}
