@@ -3,6 +3,7 @@ package com.irtrains.train_service.controller.train;
 import com.irtrains.train_service.model.enums.Type;
 import com.irtrains.train_service.model.train.train;
 import com.irtrains.train_service.service.train.trainService;
+import com.irtrains.train_service.DTO.TrainDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -45,6 +46,18 @@ public class trainController {
     public ResponseEntity<?> create(@Valid @RequestBody train payload) {
         try {
             train created = trainService.createTrain(payload);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (IllegalArgumentException ex) {
+            return error(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
+        } catch (Exception ex) {
+            return error(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error creating train", ex);
+        }
+    }
+
+    @PostMapping("/dto")
+    public ResponseEntity<?> create(@RequestBody TrainDTO trainDTO){
+        try {
+            TrainDTO created = trainService.createTrain(trainDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
         } catch (IllegalArgumentException ex) {
             return error(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);

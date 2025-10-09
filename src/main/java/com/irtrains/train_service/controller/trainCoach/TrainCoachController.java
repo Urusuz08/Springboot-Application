@@ -43,6 +43,7 @@ public class TrainCoachController {
             return error(HttpStatus.BAD_REQUEST, "Failed to add train coach", e);
         }
     }
+
     @GetMapping("/train/{trainId}") // Used to get train coaches by train ID
     public ResponseEntity<?> getTrainCoachesByTrainId(@PathVariable String trainId) {
         try {

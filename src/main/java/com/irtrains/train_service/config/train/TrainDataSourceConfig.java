@@ -26,7 +26,8 @@ import org.springframework.transaction.PlatformTransactionManager;
                 "com.irtrains.train_service.repository.seatAvailabilityRepository",
                 "com.irtrains.train_service.repository.train_coach",
                 "com.irtrains.train_service.repository.Booking",
-                "com.irtrains.train_service.repository.passenger"
+                "com.irtrains.train_service.repository.passenger",
+                "com.irtrains.train_service.repository.trainRoute"
         },
         entityManagerFactoryRef = "trainEntityManagerFactory",
         transactionManagerRef = "trainTransactionManager"
@@ -70,7 +71,8 @@ public class TrainDataSourceConfig {
                         "com.irtrains.train_service.model.trainSeatAvailability",
                         "com.irtrains.train_service.model.train_coaches",
                         "com.irtrains.train_service.model.booking",
-                        "com.irtrains.train_service.model.passenger"
+                        "com.irtrains.train_service.model.passenger",
+                        "com.irtrains.train_service.model.train_route"
                 )
                 .persistenceUnit("train")
                 .build();

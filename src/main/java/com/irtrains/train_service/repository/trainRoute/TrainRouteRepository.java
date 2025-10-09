@@ -1,10 +1,12 @@
 package com.irtrains.train_service.repository.trainRoute;
 
-import java.util.*;
-
 import com.irtrains.train_service.model.train_route.trainRoute;
-import org.springframework.data.jpa.repository.*;
-import org.springframework.stereotype.*;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TrainRouteRepository extends JpaRepository<trainRoute, Integer> {
@@ -15,14 +17,14 @@ public interface TrainRouteRepository extends JpaRepository<trainRoute, Integer>
 
     List<trainRoute> findByStationCode(String stationCode);
 
-    List<trainRoute> findByArrivalTime(String arrivalTime);
+    List<trainRoute> findByArrivalTime(LocalTime arrivalTime);
 
-    List<trainRoute> findByDepartureTime(String departureTime);
+    List<trainRoute> findByDepartureTime(LocalTime departureTime);
 
-    List<trainRoute> findByDayOfJourney(Integer dayOfJourney);
+    List<trainRoute> findByDayNumber(Integer dayNumber);
 
-    List<trainRoute> findByDistanceFromSource(Double distanceFromSource);
+    List<trainRoute> findByDistanceFromSource(Integer distanceFromSource);
 
-    List<trainRoute> findByStationCodeOrderByDayOfJourneyAscArrivalTimeAsc(String stationCode);
-    
+    List<trainRoute> findByStationCodeOrderByDayNumberAscArrivalTimeAsc(String stationCode);
+
 }

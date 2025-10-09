@@ -15,7 +15,7 @@ public interface TrainRepository extends JpaRepository<train, String> {
     // Primary key is trainId (String) handled by JpaRepository
 
     // Lookups by natural unique business keys / attributes
-    Optional<train> findByTrainId(String trainId); // redundant (same as findById) but explicit
+    train findByTrainId(String trainId); // redundant (same as findById) but explicit
     Optional<train> findByName(String name);
 
     // Existence checks

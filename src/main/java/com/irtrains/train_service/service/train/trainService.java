@@ -4,14 +4,22 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.irtrains.train_service.model.enums.Type;
 import com.irtrains.train_service.model.train.train;
+import com.irtrains.train_service.model.train_route.trainRoute;
 import com.irtrains.train_service.repository.train.TrainRepository;
+import com.irtrains.train_service.repository.trainRoute.TrainRouteRepository;
+import com.irtrains.train_service.DTO.*;
+import com.irtrains.train_service.model.train_route.trainRoute;
+
 import org.apache.commons.csv.*;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.nio.charset.*;
 import java.util.*;
+import java.time.*;
 
 /**
  * Service layer for Train aggregate. Provides validation, transactional boundaries and
@@ -22,9 +30,11 @@ import java.util.*;
 public class trainService {
 
     private final TrainRepository trainRepository;
+    private final TrainRouteRepository trainRouteRepository;
 
-    public trainService(TrainRepository trainRepository) {
+    public trainService(TrainRepository trainRepository, TrainRouteRepository trainRouteRepository) {
         this.trainRepository = trainRepository;
+        this.trainRouteRepository = trainRouteRepository;
     }
 
     /* ===================== Creation ===================== */
@@ -45,6 +55,113 @@ public class trainService {
         TypeReference<List<train>> typeReference = new TypeReference<List<train>>(){};
         List<train> trains = mapper.readValue(inputStream, typeReference);
         return trainRepository.saveAll(trains);
+    }
+
+    @Transactional
+    public TrainDTO createTrain(TrainDTO tr) {
+            train ttr = new train();
+            ttr.setTrainID(tr.getTrainId());
+            ttr.setName(tr.getTrainName());
+            ttr.setType(Type.valueOf(tr.getTrainType().toUpperCase()));
+
+
+            List<TrainRouteDTO> routeDTOs = tr.getRoute();
+            List<trainRoute> routes = new ArrayList<>();
+            for(int i=0;i<routeDTOs.size();i++){
+                if(i==0){
+                    ttr.setSourceStation(routeDTOs.get(i).getStationCode());
+                }
+
+                if(i==routeDTOs.size()-1){
+                    ttr.setDestinationStation(routeDTOs.get(i).getStationCode());
+                }
+
+                TrainRouteDTO dto = routeDTOs.get(i);
+                trainRoute route = new trainRoute();
+                route.setTrainId(tr.getTrainId());
+                route.setStationCode(dto.getStationCode());
+                route.setArrivalTime(dto.getArrivalTime());
+                route.setDepartureTime(dto.getDepartureTime());
+                route.setDayNumber(dto.getDayNumber());
+                route.setSequence(i);
+                route.setDistanceFromSource(dto.getDistanceFromSource());
+                routes.add(route);
+            }
+            trainRepository.save(ttr);
+            trainRouteRepository.saveAll(routes);
+//        return trainRouteRepository.save(tr);
+        return tr;
+    }
+
+
+
+    @Transactional // Ensures the entire method runs in a single transaction
+    public void processAndSaveRoutes(MultipartFile file) throws Exception {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+             CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim())) {
+
+            for (CSVRecord csvRecord : csvParser) {
+                // --- 1. Process Train Information ---
+                Long trainNumber = Long.parseLong(csvRecord.get("train_number"));
+                String trainName = csvRecord.get("train_name");
+                String trainType = csvRecord.get("train_type");
+
+                // Find existing train or create a new one
+                train train = new train();
+                train.setTrainID(trainNumber + "");
+                train.setName(trainName);
+                train.setType(Type.valueOf(trainType.toUpperCase()));
+                 // Placeholder, you might want to extract from CSV
+//                train.setDestinationStation("DST"); // Placeholder, you might want to extract from CSV
+                       
+
+                List<trainRoute> routes=new ArrayList<>();
+                // --- 2. Process Route Information ---
+                // We assume station columns start after the first 3 columns
+                int stopNumber = 0;
+                for (int i = 3; i < csvRecord.size(); i++) {
+                    String routeInfo = csvRecord.get(i);
+
+                    if (routeInfo == null || routeInfo.isBlank()) break;
+
+                    String[] parts = routeInfo.split("-"); // Split by "-"
+                    if (parts.length != 5) {
+                        // Handle malformed data for a specific cell, maybe log it
+                        continue;
+                    }
+
+                    String stationCode = parts[0];
+                    LocalTime arrivalTime = LocalTime.parse(parts[1]);
+                    LocalTime departureTime = LocalTime.parse(parts[2]);
+                    int journeyDay = Integer.parseInt(parts[3]);
+                    int distanceFromSource = Integer.parseInt(parts[4]); // Placeholder, you might want to extract from CSV
+
+
+                    if(i==3) train.setSourceStation(stationCode);
+                    if(i==csvRecord.size()-1) train.setDestinationStation(stationCode);
+
+
+                    // Find existing station or create a new one
+//                    Station station = stationRepository.findByStationCode(stationCode)
+//                            .orElse(new Station(stationCode, "Station Name Placeholder")); // You might need a way to get full station names
+//                    stationRepository.save(station);
+
+                    // Create the Route entity
+                    trainRoute route = new trainRoute();
+                    route.setTrainId(trainNumber + "");
+                    route.setStationCode(stationCode);
+                    route.setArrivalTime(arrivalTime);
+                    route.setDepartureTime(departureTime);
+                    route.setDayNumber(journeyDay);
+                    route.setSequence(stopNumber++);
+                    route.setDistanceFromSource(distanceFromSource);
+
+                    routes.add(route);
+                }
+                trainRepository.save(train);
+                trainRouteRepository.saveAll(routes);
+            }
+        }
     }
 
         @Transactional

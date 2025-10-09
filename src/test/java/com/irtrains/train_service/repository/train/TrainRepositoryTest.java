@@ -50,7 +50,7 @@ class TrainRepositoryTest {
         em.persistAndFlush(t);
 
         assertTrue(repo.findById("12345").isPresent());
-        assertTrue(repo.findByTrainId("12345").isPresent());
+        assertNotNull(repo.findByTrainId("12345"));
         assertTrue(repo.findByName("Rajdhani Express").isPresent());
         assertTrue(repo.existsByTrainId("12345"));
         assertTrue(repo.existsByName("Rajdhani Express"));

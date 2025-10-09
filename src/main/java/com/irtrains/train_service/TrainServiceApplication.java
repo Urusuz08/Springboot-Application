@@ -32,7 +32,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
         "com.irtrains.train_service.model.booking",
         "com.irtrains.train_service.model.passenger",
         "com.irtrains.train_service.model.trainSeatAvailability",
-        "com.irtrains.train_service.model.train_coaches"
+        "com.irtrains.train_service.model.train_coaches",
+        "com.irtrains.train_service.model.trainRoute"
 })
 public class TrainServiceApplication {
 

@@ -1,6 +1,7 @@
 package com.irtrains.train_service.model.train_route;
 
 import jakarta.persistence.*;
+import java .time.*;
 
 
 @Entity
@@ -22,10 +23,10 @@ public class trainRoute {
     private Integer sequence; // Order of the station in the route
 
     @Column(name="arrival_time", nullable=false)
-    private String arrivalTime; // Format: "HH:mm"
+    private LocalTime arrivalTime; // Format: "HH:mm"
 
     @Column(name="departure_time", nullable=false)
-    private String departureTime; // Format: "HH:mm"
+    private LocalTime departureTime; // Format: "HH:mm"
 
     @Column(name="day", nullable=false)
     private Integer dayNumber; // e.g., 1 for first day, 2 for second day
@@ -61,23 +62,27 @@ public class trainRoute {
         return sequence;
     }
 
+    public void setSequence(Integer sequence) {
+        this.sequence = sequence;
+    }
+
     public void setStationName(Integer sequence) {
         this.sequence= sequence;
     }
 
-    public String getArrivalTime() {
+    public LocalTime getArrivalTime() {
         return arrivalTime;
     }
 
-    public void setArrivalTime(String arrivalTime) {
+    public void setArrivalTime(LocalTime arrivalTime) {
         this.arrivalTime = arrivalTime;
     }
 
-    public String getDepartureTime() {
+    public LocalTime getDepartureTime() {
         return departureTime;
     }
 
-    public void setDepartureTime(String departureTime) {
+    public void setDepartureTime(LocalTime departureTime) {
         this.departureTime = departureTime;
     }
 

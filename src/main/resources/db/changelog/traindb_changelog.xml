@@ -315,6 +315,11 @@
                 <constraints nullable="false"/>
             </column>
         </addColumn>
+         <modifyDataType tableName="train_route" columnName="arrival_time" newDataType="time" />
+         <modifyDataType tableName="train_route" columnName="departure_time" newDataType="time" />
+    </changeSet>
+    <changeSet id="18" author="Urus">
+        <addAutoIncrement tableName="train_route" columnName="route_id"/>
     </changeSet>
 
 </databaseChangeLog>
