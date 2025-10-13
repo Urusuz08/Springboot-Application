@@ -4,7 +4,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.irtrains.train_service.model.enums.Type;
 import com.irtrains.train_service.model.train.train;
+import com.irtrains.train_service.model.trainSeatAvailability.trainSeatAvailability;
 import com.irtrains.train_service.model.train_route.trainRoute;
+import com.irtrains.train_service.repository.seatAvailabilityRepository.SeatAvailabilityRepository;
+import com.irtrains.train_service.repository.train_coach.TrainCoachRepository;
+import com.irtrains.train_service.model.train_coaches.train_coaches;
+
 import com.irtrains.train_service.repository.train.TrainRepository;
 import com.irtrains.train_service.repository.trainRoute.TrainRouteRepository;
 import com.irtrains.train_service.DTO.*;
@@ -31,10 +36,61 @@ public class trainService {
 
     private final TrainRepository trainRepository;
     private final TrainRouteRepository trainRouteRepository;
+    private final SeatAvailabilityRepository seatAvailabilityRepository;
+    private final TrainCoachRepository trainCoachRepository;
 
-    public trainService(TrainRepository trainRepository, TrainRouteRepository trainRouteRepository) {
+    public trainService(TrainRepository trainRepository,TrainCoachRepository trainCoachRepository, TrainRouteRepository trainRouteRepository, SeatAvailabilityRepository seatAvailabilityRepository) {
         this.trainRepository = trainRepository;
         this.trainRouteRepository = trainRouteRepository;
+        this.seatAvailabilityRepository = seatAvailabilityRepository;
+        this.trainCoachRepository = trainCoachRepository;
+    }
+
+
+
+
+
+    @Transactional
+    public trainSeatAvailability addSeatAvailability(trainSeatAvailability seatAvailability) {
+        return seatAvailabilityRepository.save(seatAvailability);
+    }
+
+    public trainSeatAvailability getSeatAvailabilityByTrainIdAndCoachIdAndDateOfJourney(String trainId, String coachId, String dateOfJourney) {
+        return seatAvailabilityRepository.findByTrainIdAndCoachIdAndDateOfJourney(trainId, coachId, dateOfJourney);
+    }
+
+    public trainSeatAvailability getSeatAvailabilityByTrainId(String trainId) {
+        return seatAvailabilityRepository.findByTrainId(trainId);
+    }
+
+    @Transactional
+    public trainSeatAvailability updateSeatAvailability(Integer seatAvailabilityId, trainSeatAvailability seatAvailabilityDetails) {
+        trainSeatAvailability existingSeatAvailability = seatAvailabilityRepository.findById(seatAvailabilityId)
+                .orElseThrow(() -> new RuntimeException("SeatAvailability not found with id: " + seatAvailabilityId));
+
+        if (seatAvailabilityDetails.getTrainId() != null) {
+            existingSeatAvailability.setTrainId(seatAvailabilityDetails.getTrainId());
+        }
+        if (seatAvailabilityDetails.getCoachId() != null) {
+            existingSeatAvailability.setCoachId(seatAvailabilityDetails.getCoachId());
+        }
+        if (seatAvailabilityDetails.getDateOfJourney() != null) {
+            existingSeatAvailability.setDateOfJourney(seatAvailabilityDetails.getDateOfJourney());
+        }
+        if (seatAvailabilityDetails.getAvailableSeats() != null) {
+            existingSeatAvailability.setAvailableSeats(seatAvailabilityDetails.getAvailableSeats());
+        }
+        if (seatAvailabilityDetails.getTotalSeats() != null) {
+            existingSeatAvailability.setTotalSeats(seatAvailabilityDetails.getTotalSeats());
+        }
+        existingSeatAvailability.setLastUpdated(System.currentTimeMillis());
+
+        return seatAvailabilityRepository.save(existingSeatAvailability);
+    }
+
+    @Transactional
+    public void deleteSeatAvailability(Integer seatAvailabilityId) {
+        seatAvailabilityRepository.deleteById(seatAvailabilityId);
     }
 
     /* ===================== Creation ===================== */
@@ -46,6 +102,66 @@ public class trainService {
         } catch (DataIntegrityViolationException ex) {
             // Re-throw with clearer message while preserving root cause
             throw new IllegalArgumentException("Train constraints violated (duplicate id or name)", ex);
+        }
+    }
+
+    @Transactional
+    public CoachDTO createTrainCoach(CoachDTO tr) {
+
+//        train_coaches temp=new train_coaches();
+//        temp.setTrainId(tr.getTrainId());
+        List<train_coaches> coaches=new ArrayList<>();
+        List<CoachD> details=tr.getDetails();
+        for(int i=0;i<details.size();i++) {
+            CoachD dto = details.get(i);
+            for (int j = 0; j < dto.getNoOfCoaches(); j++) {
+                train_coaches coach = new train_coaches();
+                coach.setTrainId(tr.getTrainId());
+                coach.setCoachType(dto.getCoachType());
+                coach.setCoachNumber(j + 1);
+                coach.setTotalAvailableSeats(dto.getAvailableSeatsperCoach());
+                coaches.add(coach);
+            }
+
+        }
+        trainCoachRepository.saveAll(coaches);
+        return tr;
+    }
+
+    @Transactional
+    public void createTrainCoachesFromCsv(MultipartFile file) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+             CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim())) {
+
+            List<train_coaches> allCoaches = new ArrayList<>();
+            String[] coachTypes = {"SL", "3A", "2A", "1A", "2S", "GN"};
+
+            for (CSVRecord csvRecord : csvParser) {
+                String trainId = csvRecord.get("trainId");
+
+                for (String coachType : coachTypes) {
+                    if (csvRecord.isMapped(coachType)) {
+                        String coachInfo = csvRecord.get(coachType);
+                        if (coachInfo != null && !coachInfo.isBlank()) {
+                            String[] parts = coachInfo.split("-");
+                            if (parts.length == 2) {
+                                int numberOfCoaches = Integer.parseInt(parts[0]);
+                                int seatsPerCoach = Integer.parseInt(parts[1]);
+
+                                for (int i = 0; i < numberOfCoaches; i++) {
+                                    train_coaches coach = new train_coaches();
+                                    coach.setTrainId(trainId);
+                                    coach.setCoachType(coachType);
+                                    coach.setCoachNumber(i + 1);
+                                    coach.setTotalAvailableSeats(seatsPerCoach);
+                                    allCoaches.add(coach);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            trainCoachRepository.saveAll(allCoaches);
         }
     }
 
@@ -102,9 +218,9 @@ public class trainService {
 
             for (CSVRecord csvRecord : csvParser) {
                 // --- 1. Process Train Information ---
-                Long trainNumber = Long.parseLong(csvRecord.get("train_number"));
-                String trainName = csvRecord.get("train_name");
-                String trainType = csvRecord.get("train_type");
+                Long trainNumber = Long.parseLong(csvRecord.get("train_id"));
+                String trainName = csvRecord.get("name");
+                String trainType = csvRecord.get("type");
 
                 // Find existing train or create a new one
                 train train = new train();
@@ -137,8 +253,9 @@ public class trainService {
                     int distanceFromSource = Integer.parseInt(parts[4]); // Placeholder, you might want to extract from CSV
 
 
-                    if(i==3) train.setSourceStation(stationCode);
-                    if(i==csvRecord.size()-1) train.setDestinationStation(stationCode);
+                    if(i==3)  train.setSourceStation(stationCode);   //Setting source Station of Train.
+
+                    if(i==csvRecord.size()-1 || csvRecord.get(i+1).isBlank() || csvRecord.get(i+1)==null) train.setDestinationStation(stationCode); //Setting Destination Station.
 
 
                     // Find existing station or create a new one
@@ -305,3 +422,4 @@ public class trainService {
         }
     }
 }
+

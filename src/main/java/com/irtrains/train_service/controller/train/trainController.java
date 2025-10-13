@@ -3,7 +3,7 @@ package com.irtrains.train_service.controller.train;
 import com.irtrains.train_service.model.enums.Type;
 import com.irtrains.train_service.model.train.train;
 import com.irtrains.train_service.service.train.trainService;
-import com.irtrains.train_service.DTO.TrainDTO;
+import com.irtrains.train_service.DTO.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -54,6 +54,19 @@ public class trainController {
         }
     }
 
+    @PostMapping("/coach")
+    public ResponseEntity<?> createWithCoaches(@RequestBody CoachDTO coachDTO){
+        try {
+            CoachDTO created = trainService.createTrainCoach(coachDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (IllegalArgumentException ex) {
+            return error(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
+        } catch (Exception ex) {
+            return error(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error creating train with coaches", ex);
+        }
+    }
+
+
     @PostMapping("/dto")
     public ResponseEntity<?> create(@RequestBody TrainDTO trainDTO){
         try {
@@ -88,6 +101,38 @@ public class trainController {
         } catch (Exception e) {
 //            e.printStackTrace();
             return error(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred during bulk creation.", e);
+        }
+    }
+
+    @PostMapping("/coaches/bulk-create")
+    public ResponseEntity<?> bulkCreateCoaches(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return error(HttpStatus.BAD_REQUEST, "File is empty", null);
+        }
+
+        try {
+            trainService.createTrainCoachesFromCsv(file);
+            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "Train coaches created successfully from CSV."));
+        } catch (IOException e) {
+            return error(HttpStatus.BAD_REQUEST, "Failed to parse the uploaded CSV file.", e);
+        } catch (Exception e) {
+            return error(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred during bulk coach creation.", e);
+        }
+    }
+
+    @PostMapping("/train/bulk-create")
+    public ResponseEntity<?> bulkCreateTrain(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return error(HttpStatus.BAD_REQUEST, "File is empty", null);
+        }
+
+        try {
+            trainService.processAndSaveRoutes(file);
+            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "Train data with routes created successfully from CSV."));
+        } catch (IOException e) {
+            return error(HttpStatus.BAD_REQUEST, "Failed to parse the uploaded CSV file.", e);
+        } catch (Exception e) {
+            return error(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred during bulk coach creation.", e);
         }
     }
 
