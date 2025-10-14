@@ -2,8 +2,11 @@ package com.irtrains.train_service.model.trainSeatAvailability;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
+import java.util.Date;
+
 @Entity
-@Table(name="train_seat_availability")
+@Table(name="train_availability")
 public class trainSeatAvailability {
 
     @Id
@@ -18,7 +21,7 @@ public class trainSeatAvailability {
     private String coachId;
 
     @Column(name="journey_date", nullable=false)
-    private String dateOfJourney; // Format: "YYYY-MM-DD"
+    private LocalDate dateOfJourney; // Format: "YYYY-MM-DD"
 
     @Column(name="available_seats", nullable=false)
     private Integer availableSeats;
@@ -51,11 +54,11 @@ public class trainSeatAvailability {
         this.coachId = coachId;
     }
 
-    public String getDateOfJourney() {
+    public LocalDate getDateOfJourney() {
         return dateOfJourney;
     }
 
-    public void setDateOfJourney(String dateOfJourney) {
+    public void setDateOfJourney(LocalDate dateOfJourney) {
         this.dateOfJourney = dateOfJourney;
     }
 

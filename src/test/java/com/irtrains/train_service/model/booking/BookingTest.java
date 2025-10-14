@@ -4,6 +4,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import java.time.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.util.Date;
@@ -29,7 +30,7 @@ public class BookingTest {
         booking.setSourceStationCode("SRC");
         booking.setDestinationStationCode("DST");
         booking.setCoachType("AC");
-        booking.setTravelDate(new Date());
+        booking.setTravelDate(LocalDate.now().plusDays(1));
         booking.setBookingDate(new Date());
         booking.setStatus("CONFIRMED");
         booking.setFare(1000.0);

@@ -2,6 +2,8 @@ package com.irtrains.train_service.model.booking;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+
+import java.time.LocalDate;
 import java.util.*;
 
 @Entity
@@ -50,7 +52,7 @@ public class Booking {
 
     @Column(name="journey_date", nullable=false)
     @Temporal(TemporalType.DATE)
-    private Date journeyDate; //Over here the datatype Date is imported from the util package.
+    private LocalDate  journeyDate; //Over here the datatype Date is imported from the util package.
 
     @Column(name="booking_date", nullable=false, updatable=false)
 //    @Temporal(TemporalType.TIMESTAMP)
@@ -125,11 +127,11 @@ public class Booking {
         this.destinationStationCode = destinationStationCode;
     }
 
-    public java.util.Date getTravelDate() {
+    public LocalDate getTravelDate() {
         return journeyDate;
     }
 
-    public void setTravelDate(java.util.Date travelDate) {
+    public void setTravelDate(LocalDate travelDate) {
         this.journeyDate = travelDate;
     }
 

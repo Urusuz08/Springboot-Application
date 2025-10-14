@@ -4,6 +4,7 @@ import com.irtrains.train_service.model.trainSeatAvailability.trainSeatAvailabil
 import com.irtrains.train_service.repository.seatAvailabilityRepository.SeatAvailabilityRepository;
 
 import org.springframework.beans.factory.annotation.*;
+import java.time.*;
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.*;
 
@@ -25,7 +26,7 @@ public class SeatAvailabilityService {
         return seatAvailabilityRepository.save(seatAvailability);
     }
 
-    public trainSeatAvailability getSeatAvailabilityByTrainIdAndCoachIdAndDateOfJourney(String trainId, String coachId, String dateOfJourney) {
+    public trainSeatAvailability getSeatAvailabilityByTrainIdAndCoachIdAndDateOfJourney(String trainId, String coachId, LocalDate dateOfJourney) {
         return seatAvailabilityRepository.findByTrainIdAndCoachIdAndDateOfJourney(trainId, coachId, dateOfJourney);
     }
 

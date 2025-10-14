@@ -6,6 +6,8 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
 import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,7 +24,7 @@ public class TrainSeatAvailabilityTest {
         seatAvailability.setSeatAvailabilityId(1);
         seatAvailability.setTrainId("12345");
         seatAvailability.setCoachId("AC");
-        seatAvailability.setDateOfJourney("2025-10-02");
+        seatAvailability.setDateOfJourney(LocalDate.now());
         seatAvailability.setAvailableSeats(100);
         seatAvailability.setTotalSeats(100);
         seatAvailability.setLastUpdated(System.currentTimeMillis());

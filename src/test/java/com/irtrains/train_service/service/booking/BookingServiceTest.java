@@ -5,6 +5,7 @@ import com.irtrains.train_service.DTO.PassengerDTO;
 import com.irtrains.train_service.model.booking.Booking;
 import com.irtrains.train_service.model.passenger.passenger;
 import com.irtrains.train_service.repository.Booking.BookingRepository;
+import java.time.*;
 import com.irtrains.train_service.service.passenger.PassengerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,7 +45,7 @@ public class BookingServiceTest {
         bookingInfoDTO.setTrainId("12345");
         bookingInfoDTO.setSourceStationCode("SRC");
         bookingInfoDTO.setDestinationStationCode("DST");
-        bookingInfoDTO.setJourneyDate(new Date());
+        bookingInfoDTO.setJourneyDate(LocalDate.now());
         bookingInfoDTO.setTotalFare(100.0);
         bookingInfoDTO.setContactNumber("1234567890");
         bookingInfoDTO.setEmail("test@example.com");

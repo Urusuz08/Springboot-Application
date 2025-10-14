@@ -1,5 +1,6 @@
 package com.irtrains.train_service.DTO;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -12,7 +13,7 @@ public class BookingInfoDTO {
     private String sourceStationCode;
     private String destinationStationCode;
     private String coachType;
-    private Date journeyDate;
+    private LocalDate journeyDate;
     private Double totalFare;
     private List<PassengerDTO> passengers;
 
@@ -66,11 +67,11 @@ public class BookingInfoDTO {
         this.destinationStationCode = destinationStationCode;
     }
 
-    public Date getJourneyDate() {
+    public LocalDate getJourneyDate() {
         return journeyDate;
     }
 
-    public void setJourneyDate(Date journeyDate) {
+    public void setJourneyDate(LocalDate journeyDate) {
         this.journeyDate = journeyDate;
     }
 

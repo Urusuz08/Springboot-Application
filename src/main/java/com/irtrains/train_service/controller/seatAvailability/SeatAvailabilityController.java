@@ -5,6 +5,7 @@ import com.irtrains.train_service.service.seatAvailabilityService.SeatAvailabili
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import java.time.*;
 
 import java.util.*;
 
@@ -44,7 +45,7 @@ public class SeatAvailabilityController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<?> getSeatAvailability(@RequestParam String trainId, @RequestParam String coachId, @RequestParam String dateOfJourney) {
+    public ResponseEntity<?> getSeatAvailability(@RequestParam String trainId, @RequestParam String coachId, @RequestParam LocalDate dateOfJourney) {
         try {
             trainSeatAvailability seatAvailability = seatAvailabilityService.getSeatAvailabilityByTrainIdAndCoachIdAndDateOfJourney(trainId, coachId, dateOfJourney);
             if (seatAvailability == null) {

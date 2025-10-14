@@ -47,15 +47,37 @@ public class trainService {
     }
 
 
-
-
-
     @Transactional
-    public trainSeatAvailability addSeatAvailability(trainSeatAvailability seatAvailability) {
-        return seatAvailabilityRepository.save(seatAvailability);
+    public List<trainSeatAvailability> addSeatAvailability() {
+
+        List<train> trains=trainRepository.findAll();
+        List<trainSeatAvailability> sA=new ArrayList<>();
+        for(int i=0;i<trains.size();i++){
+            String trainId=trains.get(i).getTrainId();
+            List<train_coaches> coaches=trainCoachRepository.findByTrainId(trainId);
+            HashMap<String,Integer> helper=new HashMap<>();
+
+            for(int j=0;j<coaches.size();j++){
+                train_coaches coach=coaches.get(j);
+
+                helper.put(coach.getCoachType(),helper.getOrDefault(coach.getCoachType(),0)+coach.getTotalAvailableSeats());
+
+            }
+            for(String a: helper.keySet()){
+                trainSeatAvailability seatAvailability=new trainSeatAvailability();
+                seatAvailability.setTrainId(trainId);
+                seatAvailability.setCoachId(a);
+                seatAvailability.setDateOfJourney(LocalDate.now());
+                seatAvailability.setAvailableSeats(helper.get(a));
+                seatAvailability.setTotalSeats(helper.get(a));
+                seatAvailability.setLastUpdated(System.currentTimeMillis());
+                sA.add(seatAvailability);
+            }
+        }
+        return seatAvailabilityRepository.saveAll(sA);
     }
 
-    public trainSeatAvailability getSeatAvailabilityByTrainIdAndCoachIdAndDateOfJourney(String trainId, String coachId, String dateOfJourney) {
+    public trainSeatAvailability getSeatAvailabilityByTrainIdAndCoachIdAndDateOfJourney(String trainId, String coachId, LocalDate dateOfJourney) {
         return seatAvailabilityRepository.findByTrainIdAndCoachIdAndDateOfJourney(trainId, coachId, dateOfJourney);
     }
 

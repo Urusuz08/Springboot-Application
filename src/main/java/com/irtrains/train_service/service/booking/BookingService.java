@@ -1,8 +1,10 @@
 package com.irtrains.train_service.service.booking;
 
 import com.irtrains.train_service.model.booking.Booking;
+import com.irtrains.train_service.model.trainSeatAvailability.trainSeatAvailability;
 import com.irtrains.train_service.repository.Booking.BookingRepository;
 import com.irtrains.train_service.model.passenger.passenger;
+import com.irtrains.train_service.repository.seatAvailabilityRepository.SeatAvailabilityRepository;
 import com.irtrains.train_service.service.passenger.PassengerService;
 import com.irtrains.train_service.DTO.*;
 import org.springframework.stereotype.Service;
@@ -19,9 +21,11 @@ import java.util.concurrent.ThreadLocalRandom;
 public class BookingService {
     private final BookingRepository bookingRepository;
     private final PassengerService passengerService;
+    private final SeatAvailabilityRepository seatAvailabilityRepository;
 
-    public BookingService(BookingRepository bookingRepository, PassengerService passengerService) {
+    public BookingService(BookingRepository bookingRepository, PassengerService passengerService, SeatAvailabilityRepository seatAvailabilityRepository) {
         this.bookingRepository = bookingRepository;
+        this.seatAvailabilityRepository = seatAvailabilityRepository;
         this.passengerService = passengerService;
     }
 
@@ -44,6 +48,8 @@ public class BookingService {
         List<Booking> existingBookings=bookingRepository.findAllByTrainIdAndJourneyDateAndCoachType(booking.getTrainId(),
                 booking.getJourneyDate(),booking.getCoachType());
 
+        trainSeatAvailability tempList = seatAvailabilityRepository.findByTrainIdAndCoachIdAndDateOfJourney(booking.getTrainId(), booking.getCoachType(), booking.getJourneyDate());
+
 
         Booking savedBooking = createBooking(newBooking);
 
@@ -62,7 +68,7 @@ public class BookingService {
 //        PassengerService passengerService = new PassengerService();
         if(existingBookings==null) existingBookings=new ArrayList<>();
 
-        passengerService.addPassengerM(passengerList, existingBookings,booking.getTrainId(),booking.getCoachType());
+        passengerService.addPassengerM(passengerList, existingBookings,booking.getTrainId(),booking.getCoachType(),tempList);
 //fix the persist error in train_coach table, which JPA is unable to do it and because of it we are not able to create the entry in the train_coach table through the api.
         return savedBooking;
     }

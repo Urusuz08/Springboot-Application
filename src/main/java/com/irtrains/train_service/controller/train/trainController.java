@@ -2,6 +2,8 @@ package com.irtrains.train_service.controller.train;
 
 import com.irtrains.train_service.model.enums.Type;
 import com.irtrains.train_service.model.train.train;
+
+import com.irtrains.train_service.model.trainSeatAvailability.trainSeatAvailability;
 import com.irtrains.train_service.service.train.trainService;
 import com.irtrains.train_service.DTO.*;
 import org.springframework.http.HttpStatus;
@@ -63,6 +65,18 @@ public class trainController {
             return error(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
         } catch (Exception ex) {
             return error(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error creating train with coaches", ex);
+        }
+    }
+
+    @PostMapping("/avail")
+    public ResponseEntity<?> createWithAvailability(){
+        try {
+            List<trainSeatAvailability> created = trainService.addSeatAvailability();
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (IllegalArgumentException ex) {
+            return error(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
+        } catch (Exception ex) {
+            return error(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error creating train with availability", ex);
         }
     }
 

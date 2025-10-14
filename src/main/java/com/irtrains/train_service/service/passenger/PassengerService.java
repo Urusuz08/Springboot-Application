@@ -2,7 +2,9 @@ package com.irtrains.train_service.service.passenger;
 
 import com.irtrains.train_service.model.booking.Booking;
 import com.irtrains.train_service.model.passenger.passenger;
+import com.irtrains.train_service.model.trainSeatAvailability.trainSeatAvailability;
 import com.irtrains.train_service.repository.passenger.PassengerRepository;
+import com.irtrains.train_service.repository.seatAvailabilityRepository.SeatAvailabilityRepository;
 import com.irtrains.train_service.model.train_coaches.train_coaches;
 import com.irtrains.train_service.service.train_coach.TrainCoachService;
 
@@ -16,21 +18,23 @@ import java.util.*;
 @Transactional(readOnly = true)
 public class PassengerService {
     private final PassengerRepository passengerRepository;
-
+    private final SeatAvailabilityRepository seatAvailabilityRepository;
     private final TrainCoachService trainCoachService;
 
-    public PassengerService(PassengerRepository passengerRepository, TrainCoachService trainCoachService) {
+    public PassengerService(PassengerRepository passengerRepository, TrainCoachService trainCoachService, SeatAvailabilityRepository seatAvailabilityRepository) {
         this.passengerRepository = passengerRepository;
         this.trainCoachService = trainCoachService;
+        this.seatAvailabilityRepository = seatAvailabilityRepository;
     }
 
 
 
     @Transactional
-    public List<passenger> addPassengerM(List<passenger> passenger, List<Booking> existingBookings,String trainId, String coachType) {
+    public List<passenger> addPassengerM(List<passenger> passenger, List<Booking> existingBookings,String trainId, String coachType, trainSeatAvailability tempList) {
 
         List<int[]> AllocatedSeats = new ArrayList<>();
         List<train_coaches> coaches = trainCoachService.getTrainCoachesbyTrainIdandCoachType(trainId, coachType);
+
 
         coaches=(coaches==null)? new ArrayList<>():coaches;
 
@@ -92,6 +96,9 @@ public class PassengerService {
                             passenger.get(k).setSeatNumber(seatNumber + "");
                             passenger.get(k).setSeatStatus("CNF");
                         }
+                        tempList.setAvailableSeats(tempList.getAvailableSeats()-passenger.size());
+                        tempList.setLastUpdated(System.currentTimeMillis());
+                        seatAvailabilityRepository.save(tempList);
                         break;
                     }
                 }
@@ -120,6 +127,10 @@ public class PassengerService {
                 }
                 if (checker == 1) break;
             }
+
+            tempList.setAvailableSeats(tempList.getAvailableSeats()-cnt);
+            tempList.setLastUpdated(System.currentTimeMillis());
+            seatAvailabilityRepository.save(tempList);
 
             for (int i = cnt; i < passenger.size(); i++) {
                 passenger.get(i).setCoachNumber(0);
