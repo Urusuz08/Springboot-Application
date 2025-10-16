@@ -40,4 +40,25 @@
                 </column>
             </createTable>
     </changeSet>
+    <changeSet id="3" author="Urus">
+        <dropPrimaryKey tableName="User"/>
+        <addUniqueConstraint tableName="User" columnNames="username" constraintName="uk_user_username"/>
+        <addNotNullConstraint tableName="User" columnName="username"/>
+        <addColumn tableName="User">
+            <column name="Id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+        </addColumn>
+
+
+        <dropPrimaryKey tableName="Admin"/>
+        <addUniqueConstraint tableName="Admin" columnNames="username" constraintName="uk_admin_username"/>
+        <addNotNullConstraint tableName="Admin" columnName="username"/>
+        <addColumn tableName="Admin">
+            <column name="Id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+        </addColumn>
+
+    </changeSet>
 </databaseChangeLog>

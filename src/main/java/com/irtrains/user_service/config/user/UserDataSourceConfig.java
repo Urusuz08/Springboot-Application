@@ -1,4 +1,4 @@
-package com.irtrains.train_service.config.user;
+package com.irtrains.user_service.config.user;
 
 
 import jakarta.persistence.EntityManagerFactory;
@@ -20,7 +20,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @EnableJpaRepositories(
-    basePackages = "com.irtrains.train_service.repository.user",
+    basePackages = "com.irtrains.user_service.repository",
     entityManagerFactoryRef = "userEntityManagerFactory",
     transactionManagerRef = "userTransactionManager"
 )
@@ -49,7 +49,7 @@ public class UserDataSourceConfig {
             @Qualifier("userDataSource") DataSource dataSource) {
         return builder
             .dataSource(dataSource)
-            .packages("com.irtrains.train_service.model.user") // Adjust package as needed
+            .packages("com.irtrains.user_service.model") // Adjust package as needed
             .persistenceUnit("user")
             .build();
     }

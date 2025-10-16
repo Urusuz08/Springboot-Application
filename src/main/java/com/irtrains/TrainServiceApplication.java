@@ -1,10 +1,9 @@
-package com.irtrains.train_service;
+package com.irtrains;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
@@ -12,6 +11,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @ComponentScan(basePackages = {
         "com.irtrains.train_service.config",
+        "com.irtrains.user_service.config",
         "com.irtrains.train_service.controller.station",
         "com.irtrains.train_service.controller.train",
         "com.irtrains.train_service.controller.bookings",
