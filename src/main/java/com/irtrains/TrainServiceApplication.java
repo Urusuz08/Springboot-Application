@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ComponentScan(basePackages = {
         "com.irtrains.train_service.config",
         "com.irtrains.user_service.config",
+        "com.irtrains.user_service.service",
+        "com.irtrains.user_service.controller",
         "com.irtrains.train_service.controller.station",
         "com.irtrains.train_service.controller.train",
         "com.irtrains.train_service.controller.bookings",

@@ -61,4 +61,13 @@
         </addColumn>
 
     </changeSet>
+    <changeSet id="4" author="Urus">
+        <renameTable oldTableName="User" newTableName="users"/>
+        <renameTable oldTableName="Admin" newTableName="admins"/>
+    </changeSet>
+    <changeSet id="5" author="Urus">
+
+        <renameColumn tableName="users" oldColumnName="Id" newColumnName="id"/>
+        <renameColumn tableName="admins" oldColumnName="Id" newColumnName="id"/>
+    </changeSet>
 </databaseChangeLog>

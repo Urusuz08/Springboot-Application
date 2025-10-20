@@ -3,13 +3,13 @@ package com.irtrains.user_service.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "User")
+@Table(name = "users")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Id", nullable = false)
-    private Long Id;
+    @Column(name = "id", nullable = false)
+    private Long id;
 
     @Column(name = "username", nullable = false, unique = true)
     private String username;
@@ -24,10 +24,10 @@ public class User {
     private String email;
 
     public void setId(Long id) {
-        Id = id;
+        this.id = id;
     }
     public Long getId() {
-        return Id;
+        return id;
     }
 
     public String getUsername() {

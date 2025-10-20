@@ -2,14 +2,16 @@ package com.irtrains.user_service.model;
 
 import jakarta.persistence.*;
 
+
+
 @Entity
-@Table(name = "Admin")
+@Table(name = "admins")
 public class Admin {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Id", nullable = false)
-    private Long Id;
+    @Column(name = "id", nullable = false)
+    private Long id;
 
     @Column(name = "username", nullable = false, unique = true)
     private String username;
@@ -27,11 +29,11 @@ public class Admin {
     private Role role;
 
     public void setId(Long id) {
-        Id = id;
+        this.id = id;
     }
 
     public Long getId() {
-        return Id;
+        return id;
     }
 
     public String getUsername() {
