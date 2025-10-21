@@ -23,6 +23,9 @@ public class User {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
+    @Column(name="password", nullable = false)
+    private String password;
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -40,6 +43,14 @@ public class User {
 
     public String getName() {
         return name;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public void setName(String name) {

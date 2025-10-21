@@ -1,5 +1,6 @@
 package com.irtrains.user_service.service;
 
+import com.irtrains.user_service.config.user.SecurityConfig;
 import com.irtrains.user_service.model.*;
 import com.irtrains.user_service.repository.*;
 import com.irtrains.user_service.DTO.*;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.*;
 public class UserService {
     private final UserRepository userRepository;
     private final AdminRepository adminRepository;
+
 
     public UserService(UserRepository userRepository, AdminRepository adminRepository) {
         this.userRepository = userRepository;

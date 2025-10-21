@@ -7,12 +7,10 @@ public class AdminDTO {
     private String email;
     private Long phone;
     private String role;
+    private String password;
 
-    public AdminDTO() {
-    }
-
-    public AdminDTO( String username, String email, Long phone, String role, String name) {
-
+    public AdminDTO( String username, String email, Long phone, String role, String name, String password) {
+        this.password = password;
         this.username = username;
         this.email = email;
         this.phone = phone;
@@ -27,6 +25,14 @@ public class AdminDTO {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public String getName() {

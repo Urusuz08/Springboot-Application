@@ -28,6 +28,9 @@ public class Admin {
     @Column(name = "role", nullable = false )
     private Role role;
 
+    @Column(name="password", nullable = false)
+    private String password;
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -42,6 +45,14 @@ public class Admin {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public String getName() {

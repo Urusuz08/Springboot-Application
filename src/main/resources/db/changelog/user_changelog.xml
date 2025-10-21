@@ -70,4 +70,16 @@
         <renameColumn tableName="users" oldColumnName="Id" newColumnName="id"/>
         <renameColumn tableName="admins" oldColumnName="Id" newColumnName="id"/>
     </changeSet>
+    <changeSet id="6" author="Urus">
+        <addColumn tableName="users">
+            <column name="password" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="admins">
+            <column name="password" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
