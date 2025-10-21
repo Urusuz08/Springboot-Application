@@ -47,3 +47,6 @@ build/
 # Build files
 .mvn/
 
+"application.properties" 
+"src/main/resources/application.properties" 
+"src/main/resources/application.properties"
