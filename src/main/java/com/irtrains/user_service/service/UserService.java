@@ -4,7 +4,9 @@ import com.irtrains.user_service.config.user.SecurityConfig;
 import com.irtrains.user_service.model.*;
 import com.irtrains.user_service.repository.*;
 import com.irtrains.user_service.DTO.*;
+import com.irtrains.user_service.config.user.SecurityConfig;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.*;
 
@@ -13,11 +15,12 @@ import org.springframework.transaction.annotation.*;
 public class UserService {
     private final UserRepository userRepository;
     private final AdminRepository adminRepository;
+    private final SecurityConfig securityConfig;
 
-
-    public UserService(UserRepository userRepository, AdminRepository adminRepository) {
+    public UserService(UserRepository userRepository, AdminRepository adminRepository, SecurityConfig securityConfig) {
         this.userRepository = userRepository;
         this.adminRepository = adminRepository;
+        this.securityConfig = securityConfig;
     }
 
     @Transactional
@@ -27,6 +30,8 @@ public class UserService {
         usertemp.setUsername(user.getUsername());
         usertemp.setEmail(user.getEmail());
         usertemp.setPhone(user.getPhone());
+        String encodedPassword = securityConfig.passwordEncoder().encode(user.getPassword());
+        usertemp.setPassword(encodedPassword);
 
 //        User savedUser=userRepository.save(usertemp);
 
@@ -41,6 +46,8 @@ public class UserService {
         admintemp.setEmail(admin.getEmail());
         admintemp.setPhone(admin.getPhone());
         admintemp.setRole(Role.valueOf(admin.getRole().toUpperCase()));
+        String encodedPassword = securityConfig.passwordEncoder().encode(admin.getPassword());
+        admintemp.setPassword(encodedPassword);
 
         return adminRepository.save(admintemp);
     }
@@ -54,6 +61,40 @@ public class UserService {
         existingUser.setUsername(userDTO.getUsername());
         existingUser.setEmail(userDTO.getEmail());
         existingUser.setPhone(userDTO.getPhone());
+
+        return userRepository.save(existingUser);
+    }
+
+
+    public User checkUserCredentials(String username, String rawPassword) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+
+        PasswordEncoder passwordEncoder = securityConfig.passwordEncoder();
+        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+            throw new RuntimeException("Invalid password for username: " + username);
+        }
+        return user;
+    }
+
+    public Admin checkAdminCredentials(String username, String rawPassword) {
+        Admin admin = adminRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Admin not found with username: " + username));
+
+        PasswordEncoder passwordEncoder = securityConfig.passwordEncoder();
+        if (!passwordEncoder.matches(rawPassword, admin.getPassword())) {
+            throw new RuntimeException("Invalid password for username: " + username);
+        }
+        return admin;
+    }
+    @Transactional
+    public User updateUserPassword(Long id, String newPassword) {
+
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+
+        String encodedPassword = securityConfig.passwordEncoder().encode(newPassword);
+        existingUser.setPassword(encodedPassword);
 
         return userRepository.save(existingUser);
     }
