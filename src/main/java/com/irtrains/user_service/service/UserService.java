@@ -6,19 +6,22 @@ import com.irtrains.user_service.repository.*;
 import com.irtrains.user_service.DTO.*;
 import com.irtrains.user_service.config.user.SecurityConfig;
 
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.*;
 
 @Transactional(readOnly = true)
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
 
 
-    public UserService(UserRepository userRepository, AdminRepository adminRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, AdminRepository adminRepository,@Lazy PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.adminRepository = adminRepository;
         this.passwordEncoder = passwordEncoder;
@@ -66,27 +69,42 @@ public class UserService {
         return userRepository.save(existingUser);
     }
 
+    @Override
+    public UserDetails loadUserByUsername(String username){
+        User user= userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
 
-    public User checkUserCredentials(String username, String rawPassword) {
-        User user = userRepository.findByUsername(username)
-                .orElse(null);
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .roles("USER")
+                .build();
 
-        if (user==null || !passwordEncoder.matches(rawPassword, user.getPassword())) {
-            throw new RuntimeException("Invalid username or password");
-        }
-        return user;
     }
 
-    public Admin checkAdminCredentials(String username, String rawPassword) {
-        Admin admin = adminRepository.findByUsername(username)
-                .orElse(null);
+    public LoginDTO authenticate(LoginDTO loginDTO) {
+        if(loginDTO.getType() == Role.USER){
+            User user = userRepository.findByUsername(loginDTO.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found with username: " + loginDTO.getUsername()));
 
+            if (passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
+                loginDTO.setStatus(true);// Authentication successful
+            } else {
+                loginDTO.setStatus(false);
+            }
+        }else{
+            Admin user = adminRepository.findByUsername(loginDTO.getUsername())
+                    .orElseThrow(() -> new RuntimeException("Admin not found with username: " + loginDTO.getUsername()));
 
-        if (admin==null || !passwordEncoder.matches(rawPassword, admin.getPassword())) {
-            throw new RuntimeException("Invalid username or password");
+            if (passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
+                loginDTO.setStatus(true); // Authentication successful
+            } else {
+                loginDTO.setStatus(false);
+            }
         }
-        return admin;
+        return loginDTO;
     }
+
     @Transactional
     public User updateUserPassword(Long id, String newPassword) {
 
