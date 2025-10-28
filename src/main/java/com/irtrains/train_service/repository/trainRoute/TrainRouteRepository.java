@@ -17,6 +17,8 @@ public interface TrainRouteRepository extends JpaRepository<trainRoute, Integer>
 
     List<trainRoute> findByStationCode(String stationCode);
 
+    List<trainRoute> findByPlace(String place);
+
     List<trainRoute> findByArrivalTime(LocalTime arrivalTime);
 
     List<trainRoute> findByDepartureTime(LocalTime departureTime);

@@ -8,7 +8,9 @@ import com.irtrains.train_service.model.trainSeatAvailability.trainSeatAvailabil
 import com.irtrains.train_service.model.train_route.trainRoute;
 import com.irtrains.train_service.repository.seatAvailabilityRepository.SeatAvailabilityRepository;
 import com.irtrains.train_service.repository.train_coach.TrainCoachRepository;
+import com.irtrains.train_service.repository.station.StationRepository;
 import com.irtrains.train_service.model.train_coaches.train_coaches;
+import com.irtrains.train_service.model.station.Station;
 
 import com.irtrains.train_service.repository.train.TrainRepository;
 import com.irtrains.train_service.repository.trainRoute.TrainRouteRepository;
@@ -38,12 +40,16 @@ public class trainService {
     private final TrainRouteRepository trainRouteRepository;
     private final SeatAvailabilityRepository seatAvailabilityRepository;
     private final TrainCoachRepository trainCoachRepository;
+    private final StationRepository stationRepository;
 
-    public trainService(TrainRepository trainRepository,TrainCoachRepository trainCoachRepository, TrainRouteRepository trainRouteRepository, SeatAvailabilityRepository seatAvailabilityRepository) {
+    public trainService(TrainRepository trainRepository,TrainCoachRepository trainCoachRepository,
+                        TrainRouteRepository trainRouteRepository, SeatAvailabilityRepository seatAvailabilityRepository,
+                        StationRepository stationRepository) {
         this.trainRepository = trainRepository;
         this.trainRouteRepository = trainRouteRepository;
         this.seatAvailabilityRepository = seatAvailabilityRepository;
         this.trainCoachRepository = trainCoachRepository;
+        this.stationRepository = stationRepository;
     }
 
 
@@ -218,6 +224,10 @@ public class trainService {
                 trainRoute route = new trainRoute();
                 route.setTrainId(tr.getTrainId());
                 route.setStationCode(dto.getStationCode());
+                Station temp=stationRepository.findByStationCode(dto.getStationCode());
+                if(temp!=null){
+                    route.setPlace(temp.getPlace());
+                }
                 route.setArrivalTime(dto.getArrivalTime());
                 route.setDepartureTime(dto.getDepartureTime());
                 route.setDayNumber(dto.getDayNumber());
@@ -269,6 +279,12 @@ public class trainService {
                     }
 
                     String stationCode = parts[0];
+                    Station station = stationRepository.findByStationCode(stationCode);
+                    String place=new String();
+                    if(station!=null){
+                        place=station.getPlace();
+                    }
+
                     LocalTime arrivalTime = LocalTime.parse(parts[1]);
                     LocalTime departureTime = LocalTime.parse(parts[2]);
                     int journeyDay = Integer.parseInt(parts[3]);
@@ -289,6 +305,7 @@ public class trainService {
                     trainRoute route = new trainRoute();
                     route.setTrainId(trainNumber + "");
                     route.setStationCode(stationCode);
+                    route.setPlace(place);
                     route.setArrivalTime(arrivalTime);
                     route.setDepartureTime(departureTime);
                     route.setDayNumber(journeyDay);
@@ -371,6 +388,29 @@ public class trainService {
 
     public List<train> findBySourceStation(String sourceStation) {
         return trainRepository.findBySourceStation(sourceStation);
+    }
+
+    public List<train> findTrains(String source, String destination){
+        List<train> trains=new ArrayList<>();
+        HashMap<String,Integer> trainMap=new HashMap<>();
+
+        Station src= stationRepository.findByStationCode(source);
+        Station dest= stationRepository.findByStationCode(destination);
+        List<trainRoute> sourceTrains=trainRouteRepository.findByPlace(src.getPlace());
+        List<trainRoute> destinationTrains=trainRouteRepository.findByPlace(dest.getPlace());
+
+        for(int i=0;i<sourceTrains.size();i++){
+            trainMap.put(sourceTrains.get(i).getTrainId(),sourceTrains.get(i).getSequence());
+        }
+
+        for(trainRoute a:destinationTrains){
+            if(trainMap.containsKey(a.getTrainId()) && trainMap.get(a.getTrainId())<a.getSequence()){
+                Optional<train> temp=trainRepository.findById(a.getTrainId());
+                temp.ifPresent(trains::add);
+            }
+        }
+
+        return trains;
     }
 
     public List<train> findByDestinationStation(String destinationStation) {

@@ -12,7 +12,7 @@ import com.irtrains.user_service.service.*;
 
 @RestController
 @RequestMapping("/api/account")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins= {"http://localhost:3000"})
 public class UserController {
     private final UserService userService;;
     private final JWTUtility jwtUtility;

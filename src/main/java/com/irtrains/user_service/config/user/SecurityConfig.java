@@ -1,6 +1,7 @@
 package com.irtrains.user_service.config.user;
 
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -17,6 +18,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.*;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -46,6 +50,28 @@ public class SecurityConfig {
     }
 
     @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        // 1. Set your specific origin
+        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+
+        // 2. Specify the methods you want to allow
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        // 3. (THE FIX) Use "*" to allow all headers, OR be specific. Let's just use "*" for simplicity.
+        configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
+
+        // 4. (IMPORTANT) This is necessary for any authenticated requests (like sending a JWT)
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
+    }
+
+    @Bean
     public AuthenticationProvider userAuthenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userService);
@@ -69,12 +95,15 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain adminSecurityFilterChain(HttpSecurity http) throws Exception {
         http.securityMatcher("/api/admin/**")
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize ->
-                        authorize.requestMatchers("/api/admin/login").permitAll()
+                        authorize
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                .requestMatchers("/api/account/admin/login","/api/account/admin/register").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
-                .csrf(csrf -> csrf.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 // Set the custom authentication provider
@@ -90,20 +119,24 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain userSecurityFilterChain(HttpSecurity http) throws Exception {
         http
+                .securityMatcher("/api/account/user/**", "/api/trains/**")
         .authorizeHttpRequests(authorize ->
-                authorize.requestMatchers("/api/user/login","/api/user/register","/api/admin/register",
+                authorize
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/api/account/user/login","/api/account/user/register",
                                 "/api/trains").permitAll()
                         .anyRequest().authenticated()
         )
-                .httpBasic(Customizer.withDefaults())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
+                .httpBasic(Customizer.withDefaults())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 // Set the custom authentication provider
                 .authenticationProvider(userAuthenticationProvider())
 
                 // Add the custom JWT filter before Spring's default UsernamePassword filter
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);;
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
