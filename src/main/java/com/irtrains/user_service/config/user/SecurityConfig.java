@@ -124,7 +124,7 @@ public class SecurityConfig {
                 authorize
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/account/user/login","/api/account/user/register",
-                                "/api/trains").permitAll()
+                                "/api/trains", "/api/trains/route").permitAll()
                         .anyRequest().authenticated()
         )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))

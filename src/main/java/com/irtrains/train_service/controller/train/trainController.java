@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.*;
 
 @RestController
@@ -247,9 +248,9 @@ public class trainController {
     /* ========================= Route Queries ========================= */
     @GetMapping("/route")
     public ResponseEntity<?> route(@RequestParam("from") String from,
-                                   @RequestParam("to") String to) {
+                                   @RequestParam("to") String to, @RequestParam("date")LocalDate date) {
         try {
-            return ResponseEntity.ok(trainService.findTrains(from, to));
+            return ResponseEntity.ok(trainService.findTrains(from, to, date));
         } catch (Exception ex) {
             return error(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error fetching route", ex);
         }
