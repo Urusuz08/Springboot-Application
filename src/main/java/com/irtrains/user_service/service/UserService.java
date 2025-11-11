@@ -83,12 +83,13 @@ public class UserService implements UserDetailsService {
     }
 
     public LoginDTO authenticate(LoginDTO loginDTO) {
-        if(loginDTO.getType() == Role.USER){
+        if(loginDTO.getType() == Role.USER || loginDTO.getType() == null){
             User user = userRepository.findByUsername(loginDTO.getUsername())
                     .orElseThrow(() -> new RuntimeException("User not found with username: " + loginDTO.getUsername()));
 
             if (passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
-                loginDTO.setStatus(true);// Authentication successful
+                loginDTO.setType("User");
+                loginDTO.setStatus(true);
             } else {
                 loginDTO.setStatus(false);
             }
@@ -97,7 +98,7 @@ public class UserService implements UserDetailsService {
                     .orElseThrow(() -> new RuntimeException("Admin not found with username: " + loginDTO.getUsername()));
 
             if (passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
-                loginDTO.setStatus(true); // Authentication successful
+                loginDTO.setStatus(true);
             } else {
                 loginDTO.setStatus(false);
             }

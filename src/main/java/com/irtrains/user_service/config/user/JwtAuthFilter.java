@@ -15,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.irtrains.user_service.service.*;
 
 import java.io.IOException;
+import java.util.Set;
 
 @Component // Must be a Spring bean
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -29,6 +30,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         this.jwtService = jwtService;
         this.userService = userService;
         this.adminService = adminService;
+    }
+
+    private static final Set<String> PUBLIC_PATHS = Set.of(
+            "/api/account/admin/login",
+            "/api/account/admin/register",
+            "/api/account/user/login",
+            "/api/account/user/register",
+            "/api/trains"
+    );
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getServletPath();
+        return PUBLIC_PATHS.contains(path);
     }
 
     @Override
