@@ -207,7 +207,7 @@ public class trainService {
             ttr.setTrainID(tr.getTrainId());
             ttr.setName(tr.getTrainName());
             ttr.setType(Type.valueOf(tr.getTrainType().toUpperCase()));
-            ttr.setFriday(tr.isMonday());
+            ttr.setMonday(tr.isMonday());
             ttr.setSaturday(tr.isSaturday());
             ttr.setSunday(tr.isSunday());
             ttr.setThursday(tr.isThursday());
@@ -408,19 +408,24 @@ public class trainService {
         List<trainRoute> destinationTrains=trainRouteRepository.findByPlace(dest.getPlace());
 
         // Filtering trains that do not run on the specified day
-        for(trainRoute a:sourceTrains){
-            Optional<train> temp=trainRepository.findById(a.getTrainId());
-            if(temp.isPresent() && !runsOnDay(temp.get(),dayOfWeek)){
-                sourceTrains.remove(a);
+        Iterator<trainRoute> sourceIterator = sourceTrains.iterator();
+        while (sourceIterator.hasNext()) {
+            trainRoute a = sourceIterator.next();
+            Optional<train> temp = trainRepository.findById(a.getTrainId());
+            if (temp.isPresent() && !runsOnDay(temp.get(), dayOfWeek)) {
+                sourceIterator.remove();
             }
         }
 
-        for(trainRoute a:destinationTrains){
-            Optional<train> temp=trainRepository.findById(a.getTrainId());
-            if(temp.isPresent() && !runsOnDay(temp.get(),dayOfWeek)){
-                destinationTrains.remove(a);
+        Iterator<trainRoute> destIterator = destinationTrains.iterator();
+        while (destIterator.hasNext()) {
+            trainRoute a = destIterator.next();
+            Optional<train> temp = trainRepository.findById(a.getTrainId());
+            if (temp.isPresent() && !runsOnDay(temp.get(), dayOfWeek)) {
+                destIterator.remove();
             }
         }
+
 
 
         for(int i=0;i<sourceTrains.size();i++){
@@ -444,16 +449,18 @@ public class trainService {
     public boolean runsOnDay(train t, String dayOfWeek) {
 //
 
-        return switch (dayOfWeek.toLowerCase()) {
-            case "monday" -> t.isMonday();
-            case "tuesday" -> t.isTuesday();
-            case "wednesday" -> t.isWednesday();
-            case "thursday" -> t.isThursday();
-            case "friday" -> t.isFriday();
-            case "saturday" -> t.isSaturday();
-            case "sunday" -> t.isSunday();
-            default -> throw new IllegalArgumentException("Invalid day of week: " + dayOfWeek);
-        };
+            return switch (dayOfWeek) {
+                case "MONDAY" -> t.isMonday();
+                case "TUESDAY" -> t.isTuesday();
+                case "WEDNESDAY" -> t.isWednesday();
+                case "THURSDAY" -> t.isThursday();
+                case "FRIDAY" -> t.isFriday();
+                case "SATURDAY" -> t.isSaturday();
+                case "SUNDAY" -> t.isSunday();
+                default ->false;
+            };
+
+
     }
     public List<train> findByDestinationStation(String destinationStation) {
         return trainRepository.findByDestinationStation(destinationStation);

@@ -154,14 +154,14 @@ public class UserController {
         Admin admin =userService.getAdminByUsername(loginDTO.getUsername());
         Map<String, Object> response = new LinkedHashMap<>();
 
-        adauDTO adminDTO = new adauDTO(admin.getName(),admin.getUsername(), admin.getPassword());
+        usauDTO adminDTO = new usauDTO(admin.getName(),admin.getUsername(), admin.getPassword());
         response.put("token", token);
         response.put("admin", adminDTO);
 
         return  ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PostMapping("/authenticate")
+    @PostMapping("/user/authenticate")
     public ResponseEntity<?> authenticateToken(@RequestHeader("Authorization") String token) {
         try {
             String jwtToken = token.substring(7); // Remove "Bearer " prefix
