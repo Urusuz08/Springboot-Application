@@ -3,7 +3,7 @@ package com.irtrains.train_service.controller.train;
 import com.irtrains.train_service.model.enums.Type;
 import com.irtrains.train_service.model.train.train;
 import com.irtrains.train_service.model.train_route.trainRoute;
-import com.irtrains.train_service.model.train_route.trainRoute;
+
 
 import com.irtrains.train_service.model.trainSeatAvailability.trainSeatAvailability;
 import com.irtrains.train_service.service.train.trainService;

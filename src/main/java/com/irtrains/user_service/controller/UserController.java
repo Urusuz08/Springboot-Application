@@ -20,7 +20,7 @@ import java.util.Map;
 @RequestMapping("/api/account")
 @CrossOrigin(origins= {"http://localhost:3000"})
 public class UserController {
-    private final UserService userService;;
+    private final UserService userService;
     private final JWTUtility jwtUtility;
     private final AuthenticationService AuthenticationService;
 

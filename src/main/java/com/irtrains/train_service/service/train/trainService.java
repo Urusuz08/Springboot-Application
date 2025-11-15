@@ -18,7 +18,10 @@ import com.irtrains.train_service.DTO.*;
 import com.irtrains.train_service.model.train_route.trainRoute;
 
 import org.apache.commons.csv.*;
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.cache.annotation.*;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -395,7 +398,10 @@ public class trainService {
         return trainRepository.findBySourceStation(sourceStation);
     }
 
+    @Cacheable(value = "trains", key = "#source + '-' + #destination + '-' + #dateOfJourney.toString()")
     public List<train> findTrains(String source, String destination, LocalDate dateOfJourney) {
+
+        System.out.println("Fetching from DB for " + source + " to " + destination + " on " + dateOfJourney.toString());
         List<train> trains=new ArrayList<>();
         Set<train> trainSet=new HashSet<>();
         HashMap<String,Integer> trainMap=new HashMap<>();
