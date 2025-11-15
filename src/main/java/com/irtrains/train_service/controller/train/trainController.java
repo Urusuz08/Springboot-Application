@@ -2,10 +2,13 @@ package com.irtrains.train_service.controller.train;
 
 import com.irtrains.train_service.model.enums.Type;
 import com.irtrains.train_service.model.train.train;
+import com.irtrains.train_service.model.train_route.trainRoute;
+import com.irtrains.train_service.model.train_route.trainRoute;
 
 import com.irtrains.train_service.model.trainSeatAvailability.trainSeatAvailability;
 import com.irtrains.train_service.service.train.trainService;
 import com.irtrains.train_service.DTO.*;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -14,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.*;
 
 @RestController
@@ -238,12 +242,15 @@ public class trainController {
         }
     }
 
+//    @GetMapping('/src-dest')
+//    public ResponseEntity<?>
+
     /* ========================= Route Queries ========================= */
     @GetMapping("/route")
     public ResponseEntity<?> route(@RequestParam("from") String from,
-                                   @RequestParam("to") String to) {
+                                   @RequestParam("to") String to, @RequestParam("date")LocalDate date) {
         try {
-            return ResponseEntity.ok(trainService.findBySourceAndDestination(from, to));
+            return ResponseEntity.ok(trainService.findTrains(from, to, date));
         } catch (Exception ex) {
             return error(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error fetching route", ex);
         }

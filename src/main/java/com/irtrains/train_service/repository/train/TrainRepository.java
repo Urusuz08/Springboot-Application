@@ -28,6 +28,8 @@ public interface TrainRepository extends JpaRepository<train, String> {
     List<train> findByDestinationStation(String destinationStation);
     List<train> findBySourceStationAndDestinationStation(String sourceStation, String destinationStation);
 
+
+
     // Partial text search on name or trainId
     @Query("SELECT t FROM train t WHERE lower(t.name) LIKE lower(concat('%', :term, '%')) OR t.trainId LIKE concat('%', :term, '%')")
     List<train> searchByNameOrId(@Param("term") String term);

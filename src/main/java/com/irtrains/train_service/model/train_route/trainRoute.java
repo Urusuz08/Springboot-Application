@@ -19,6 +19,9 @@ public class trainRoute {
     @Column(name="station_code", nullable=false)
     private String stationCode;
 
+    @Column(name="place", nullable=false)
+    private String place;
+
     @Column(name="sequence", nullable=false)
     private Integer sequence; // Order of the station in the route
 
@@ -66,8 +69,11 @@ public class trainRoute {
         this.sequence = sequence;
     }
 
-    public void setStationName(Integer sequence) {
-        this.sequence= sequence;
+    public  String getPlace() {
+        return place;
+    }
+    public void setPlace(String place) {
+        this.place = place;
     }
 
     public LocalTime getArrivalTime() {

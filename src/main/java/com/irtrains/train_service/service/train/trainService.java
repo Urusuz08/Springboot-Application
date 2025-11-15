@@ -8,7 +8,9 @@ import com.irtrains.train_service.model.trainSeatAvailability.trainSeatAvailabil
 import com.irtrains.train_service.model.train_route.trainRoute;
 import com.irtrains.train_service.repository.seatAvailabilityRepository.SeatAvailabilityRepository;
 import com.irtrains.train_service.repository.train_coach.TrainCoachRepository;
+import com.irtrains.train_service.repository.station.StationRepository;
 import com.irtrains.train_service.model.train_coaches.train_coaches;
+import com.irtrains.train_service.model.station.Station;
 
 import com.irtrains.train_service.repository.train.TrainRepository;
 import com.irtrains.train_service.repository.trainRoute.TrainRouteRepository;
@@ -38,12 +40,16 @@ public class trainService {
     private final TrainRouteRepository trainRouteRepository;
     private final SeatAvailabilityRepository seatAvailabilityRepository;
     private final TrainCoachRepository trainCoachRepository;
+    private final StationRepository stationRepository;
 
-    public trainService(TrainRepository trainRepository,TrainCoachRepository trainCoachRepository, TrainRouteRepository trainRouteRepository, SeatAvailabilityRepository seatAvailabilityRepository) {
+    public trainService(TrainRepository trainRepository,TrainCoachRepository trainCoachRepository,
+                        TrainRouteRepository trainRouteRepository, SeatAvailabilityRepository seatAvailabilityRepository,
+                        StationRepository stationRepository) {
         this.trainRepository = trainRepository;
         this.trainRouteRepository = trainRouteRepository;
         this.seatAvailabilityRepository = seatAvailabilityRepository;
         this.trainCoachRepository = trainCoachRepository;
+        this.stationRepository = stationRepository;
     }
 
 
@@ -201,7 +207,13 @@ public class trainService {
             ttr.setTrainID(tr.getTrainId());
             ttr.setName(tr.getTrainName());
             ttr.setType(Type.valueOf(tr.getTrainType().toUpperCase()));
-
+            ttr.setFriday(tr.isMonday());
+            ttr.setSaturday(tr.isSaturday());
+            ttr.setSunday(tr.isSunday());
+            ttr.setThursday(tr.isThursday());
+            ttr.setWednesday(tr.isWednesday());
+            ttr.setTuesday(tr.isTuesday());
+            ttr.setFriday(tr.isFriday());
 
             List<TrainRouteDTO> routeDTOs = tr.getRoute();
             List<trainRoute> routes = new ArrayList<>();
@@ -218,6 +230,10 @@ public class trainService {
                 trainRoute route = new trainRoute();
                 route.setTrainId(tr.getTrainId());
                 route.setStationCode(dto.getStationCode());
+                Station temp=stationRepository.findByStationCode(dto.getStationCode());
+                if(temp!=null){
+                    route.setPlace(temp.getPlace());
+                }
                 route.setArrivalTime(dto.getArrivalTime());
                 route.setDepartureTime(dto.getDepartureTime());
                 route.setDayNumber(dto.getDayNumber());
@@ -230,7 +246,6 @@ public class trainService {
 //        return trainRouteRepository.save(tr);
         return tr;
     }
-
 
 
     @Transactional // Ensures the entire method runs in a single transaction
@@ -251,7 +266,7 @@ public class trainService {
                 train.setType(Type.valueOf(trainType.toUpperCase()));
                  // Placeholder, you might want to extract from CSV
 //                train.setDestinationStation("DST"); // Placeholder, you might want to extract from CSV
-                       
+
 
                 List<trainRoute> routes=new ArrayList<>();
                 // --- 2. Process Route Information ---
@@ -269,6 +284,12 @@ public class trainService {
                     }
 
                     String stationCode = parts[0];
+                    Station station = stationRepository.findByStationCode(stationCode);
+                    String place=new String();
+                    if(station!=null){
+                        place=station.getPlace();
+                    }
+
                     LocalTime arrivalTime = LocalTime.parse(parts[1]);
                     LocalTime departureTime = LocalTime.parse(parts[2]);
                     int journeyDay = Integer.parseInt(parts[3]);
@@ -289,6 +310,7 @@ public class trainService {
                     trainRoute route = new trainRoute();
                     route.setTrainId(trainNumber + "");
                     route.setStationCode(stationCode);
+                    route.setPlace(place);
                     route.setArrivalTime(arrivalTime);
                     route.setDepartureTime(departureTime);
                     route.setDayNumber(journeyDay);
@@ -373,6 +395,66 @@ public class trainService {
         return trainRepository.findBySourceStation(sourceStation);
     }
 
+    public List<train> findTrains(String source, String destination, LocalDate dateOfJourney) {
+        List<train> trains=new ArrayList<>();
+        Set<train> trainSet=new HashSet<>();
+        HashMap<String,Integer> trainMap=new HashMap<>();
+
+        String dayOfWeek=dateOfJourney.getDayOfWeek().toString();
+
+        Station src= stationRepository.findByStationCode(source);
+        Station dest= stationRepository.findByStationCode(destination);
+        List<trainRoute> sourceTrains=trainRouteRepository.findByPlace(src.getPlace());
+        List<trainRoute> destinationTrains=trainRouteRepository.findByPlace(dest.getPlace());
+
+        // Filtering trains that do not run on the specified day
+        for(trainRoute a:sourceTrains){
+            Optional<train> temp=trainRepository.findById(a.getTrainId());
+            if(temp.isPresent() && !runsOnDay(temp.get(),dayOfWeek)){
+                sourceTrains.remove(a);
+            }
+        }
+
+        for(trainRoute a:destinationTrains){
+            Optional<train> temp=trainRepository.findById(a.getTrainId());
+            if(temp.isPresent() && !runsOnDay(temp.get(),dayOfWeek)){
+                destinationTrains.remove(a);
+            }
+        }
+
+
+        for(int i=0;i<sourceTrains.size();i++){
+            trainMap.put(sourceTrains.get(i).getTrainId(),sourceTrains.get(i).getSequence());
+        }
+
+        for(trainRoute a:destinationTrains){
+            if(trainMap.containsKey(a.getTrainId()) && trainMap.get(a.getTrainId())<a.getSequence()){
+                Optional<train> temp=trainRepository.findById(a.getTrainId());
+                if(temp.isPresent() && !trainSet.contains(temp.get())){
+                    trains.add(temp.get());
+                    trainSet.add(temp.get());
+                }
+
+
+            }
+        }
+
+        return trains;
+    }
+    public boolean runsOnDay(train t, String dayOfWeek) {
+//
+
+        return switch (dayOfWeek.toLowerCase()) {
+            case "monday" -> t.isMonday();
+            case "tuesday" -> t.isTuesday();
+            case "wednesday" -> t.isWednesday();
+            case "thursday" -> t.isThursday();
+            case "friday" -> t.isFriday();
+            case "saturday" -> t.isSaturday();
+            case "sunday" -> t.isSunday();
+            default -> throw new IllegalArgumentException("Invalid day of week: " + dayOfWeek);
+        };
+    }
     public List<train> findByDestinationStation(String destinationStation) {
         return trainRepository.findByDestinationStation(destinationStation);
     }
