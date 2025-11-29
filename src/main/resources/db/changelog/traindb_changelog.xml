@@ -338,4 +338,65 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="21" author="Urus">
+        <createTable tableName="fare_rule_sets">
+            <column name="rule_set_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="rule_set_name" type="varchar(255)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="effective_from" type="date"/>
+            <column name="effective_to" type="date"/>
+            <column name="currency" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)"/>
+            <column name="created_by" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="22" author="Urus">
+        <createTable tableName="fare_class_rate">
+            <column name="fare_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="fare_rule_set_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_fare_rule_set" references="fare_rule_sets(rule_set_id)"/>
+            </column>
+            <column name="class_type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rate_per_km" type="double">
+                <constraints nullable="false"/>
+            </column>
+            <column name="base_fare" type="double">
+                <constraints nullable="false"/>
+            </column>
+            <column name="min_fare" type="double">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="23" author="Urus">
+        <addColumn tableName="bookings">
+            <column name="fare_breakup" type="JSONB">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
