@@ -25,7 +25,8 @@ public class PassengerService {
 
 
     @Transactional
-    public List<passenger> addPassengerM(List<passenger> passenger, List<Booking> existingBookings,String trainId, String coachType, trainSeatAvailability tempList) {
+    public List<passenger> addPassengerM(List<passenger> passenger, List<Booking> existingBookings,String trainId,
+                                         String coachType, trainSeatAvailability tempList, Map<String,Object> response) {
 
         List<int[]> AllocatedSeats = new ArrayList<>();
         List<train_coaches> coaches = trainCoachService.getTrainCoachesbyTrainIdandCoachType(trainId, coachType);
@@ -40,14 +41,14 @@ public class PassengerService {
             AllocatedSeats.add(seatArray);
         }
 
-        HashMap<Integer,String> bType=new HashMap<>();
+
+
+        HashMap<Integer, String> bType=new HashMap<>();
         bType.put(1,"LB");
-        bType.put(2,"MB");
-        bType.put(3,"UB");
-        bType.put(4,"LB");
-        bType.put(5,"MB");
-        bType.put(6,"UB");
-        bType.put(7,"SL");
+        bType.put(2,"UB");
+        bType.put(3,"LB");
+        bType.put(4,"UB");
+        bType.put(5,"SL");
         bType.put(0,"SU");
 
         if(existingBookings.size()>0){
@@ -133,8 +134,9 @@ public class PassengerService {
                 passenger.get(i).setSeatStatus("WAITING");
             }
         }
-
-        return passengerRepository.saveAll(passenger);
+        List<passenger> passengers=passengerRepository.saveAll(passenger);
+        response.put("Passengers", passengers);
+        return passengers;
     }
 
     @Transactional

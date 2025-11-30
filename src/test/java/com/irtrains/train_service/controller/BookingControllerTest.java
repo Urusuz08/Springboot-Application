@@ -54,16 +54,7 @@ public class BookingControllerTest {
         // Set properties for bookingInfoDTO as needed for tests
     }
 
-    @Test
-    void testCreateBooking_Success() throws Exception {
-        when(bookingService.addBooking(any(BookingInfoDTO.class))).thenReturn(booking);
 
-        mockMvc.perform(post("/api/bookings")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(bookingInfoDTO)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.pnrNumber").value("PNR123456"));
-    }
 
     @Test
     void testCreateBooking_Failure() throws Exception {

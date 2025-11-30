@@ -6,7 +6,7 @@ import java.util.List;
 
 public class BookingInfoDTO {
 
-    private String userId;
+
     private String contactNumber;
     private String email;
     private String trainId;
@@ -14,18 +14,10 @@ public class BookingInfoDTO {
     private String destinationStationCode;
     private String coachType;
     private LocalDate journeyDate;
-    private Double totalFare;
     private List<PassengerDTO> passengers;
 
     // Getters and Setters
 
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
 
     public String getContactNumber() {
         return contactNumber;
@@ -73,14 +65,6 @@ public class BookingInfoDTO {
 
     public void setJourneyDate(LocalDate journeyDate) {
         this.journeyDate = journeyDate;
-    }
-
-    public Double getTotalFare() {
-        return totalFare;
-    }
-
-    public void setTotalFare(Double totalFare) {
-        this.totalFare = totalFare;
     }
 
     public List<PassengerDTO> getPassengers() {

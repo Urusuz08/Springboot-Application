@@ -2,9 +2,13 @@ package com.irtrains.train_service.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
 import java.util.*;
+
+
 
 @Entity
 @Table(name="bookings")
@@ -63,6 +67,10 @@ public class Booking {
 
     @Column(name = "total_fare", nullable = false)
     private Double fare;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name="fare_breakup", columnDefinition = "JSONB", nullable =false)
+    private Map<String,Object> fareBreakup; // JSON or String representation of fare details
 
     public Long getBookingId() {
         return bookingId;
@@ -164,5 +172,12 @@ public class Booking {
 
     public void setCoachType(String coachType) {
         this.coachType = coachType;
+    }
+
+    public Map<String, Object> getFareBreakup() {
+        return fareBreakup;
+    }
+    public void setFareBreakup(Map<String, Object> fareBreakup) {
+        this.fareBreakup = fareBreakup;
     }
 }

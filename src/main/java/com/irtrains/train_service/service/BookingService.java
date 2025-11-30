@@ -1,14 +1,19 @@
 package com.irtrains.train_service.service;
 
 import com.irtrains.train_service.model.*;
+import com.irtrains.user_service.model.*;
+import com.irtrains.user_service.repository.UserRepository;
 import com.irtrains.train_service.repository.*;
 import com.irtrains.train_service.DTO.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.time.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -16,25 +21,51 @@ import java.util.concurrent.ThreadLocalRandom;
 @Transactional(readOnly = true)
 public class BookingService {
     private final BookingRepository bookingRepository;
+    private final TrainRouteRepository trainRouteRepository;
     private final PassengerService passengerService;
     private final SeatAvailabilityRepository seatAvailabilityRepository;
+    private final FareRuleSetRepo fareRuleSetRepo;
+    private final FareClassRateRepo fareClassRateRepo;
+    private final UserRepository userRepository;
 
-    public BookingService(BookingRepository bookingRepository, PassengerService passengerService, SeatAvailabilityRepository seatAvailabilityRepository) {
+    public BookingService(BookingRepository bookingRepository, PassengerService passengerService, SeatAvailabilityRepository seatAvailabilityRepository,
+                          FareRuleSetRepo fareRuleSetRepo, FareClassRateRepo fareClassRateRepo, UserRepository userRepository,
+                          TrainRouteRepository trainRouteRepository) {
+        this.trainRouteRepository = trainRouteRepository;
+        this.userRepository = userRepository;
+        this.fareRuleSetRepo = fareRuleSetRepo;
+        this.fareClassRateRepo = fareClassRateRepo;
         this.bookingRepository = bookingRepository;
         this.seatAvailabilityRepository = seatAvailabilityRepository;
         this.passengerService = passengerService;
     }
 
     @Transactional
-    public Booking addBooking(BookingInfoDTO booking) {
+    public Map<String,Object> addBooking(BookingInfoDTO booking) {
 
         Booking newBooking = new Booking();
-        newBooking.setUserId(booking.getUserId());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentPrincipalName = (authentication != null) ? authentication.getName() : "system";
+
+        Optional<User> userOpt = userRepository.findByUsername(currentPrincipalName);
+
+        if(userOpt.isEmpty()){
+            throw new RuntimeException("User not found: " + currentPrincipalName);
+        }
+
+        newBooking.setUserId(userOpt.get().getId()+"");
         newBooking.setTrainId(booking.getTrainId());
         newBooking.setSourceStationCode(booking.getSourceStationCode());
         newBooking.setDestinationStationCode(booking.getDestinationStationCode());
         newBooking.setTravelDate(booking.getJourneyDate());
-        newBooking.setFare(booking.getTotalFare());
+
+        int distance = trainRouteRepository.distance(booking.getTrainId(), booking.getSourceStationCode(), booking.getDestinationStationCode());
+        Map<String, Object> fareDetails = calculateFare(booking.getCoachType(), booking.getPassengers().size(),
+                distance);
+
+        newBooking.setFare((Double) fareDetails.get("Total Fare"));
+
+        newBooking.setFareBreakup(fareDetails);
         newBooking.setContactNumber(booking.getContactNumber());
         newBooking.setEmail(booking.getEmail());
         newBooking.setCoachType(booking.getCoachType());
@@ -64,9 +95,12 @@ public class BookingService {
 //        PassengerService passengerService = new PassengerService();
         if(existingBookings==null) existingBookings=new ArrayList<>();
 
-        passengerService.addPassengerM(passengerList, existingBookings,booking.getTrainId(),booking.getCoachType(),tempList);
+        Map<String,Object> response=new HashMap<>();
+        response.put("booking", savedBooking);
+
+        passengerService.addPassengerM(passengerList, existingBookings,booking.getTrainId(),booking.getCoachType(),tempList,response);
 //fix the persist error in train_coach table, which JPA is unable to do it and because of it we are not able to create the entry in the train_coach table through the api.
-        return savedBooking;
+        return response;
     }
     @Transactional
     public Booking createBooking(Booking booking) {
@@ -102,4 +136,35 @@ public class BookingService {
     public void cancelBooking(String pnrNumber) {
         updateBookingStatus(pnrNumber, "CANCELLED");
     }
+
+    //helper function to calculate fare
+    public Map<String,Object> calculateFare(String classType, int numOfPassengers, int distance){
+            fareRuleSet fr= fareRuleSetRepo.findByEffectiveDate(LocalDate.now());
+            if(fr==null){
+                throw new RuntimeException("Fare Rule Set not found for the current date");
+            }
+
+            Optional<fareClassRate> fcr= fareClassRateRepo.findByClassTypeAndFareRuleSetId(classType, fr.getRuleSetId());
+
+            if(fcr.isEmpty()){
+                throw new RuntimeException("Fare Class Rate not found for the given class type");
+            }
+
+            double farePerKm=fcr.get().getRatePerKm();
+            double baseFare= fcr.get().getBaseFare();
+
+            double totalFare= (farePerKm * distance + baseFare) * numOfPassengers;
+
+            totalFare=Math.max(totalFare, fcr.get().getMinFare() * numOfPassengers);
+
+            Map<String,Object> fareBreakup=new HashMap<>();
+            fareBreakup.put("Base Fare", baseFare);
+            fareBreakup.put("totalDistnaceFare", farePerKm*distance);
+            fareBreakup.put("Number of Passengers", numOfPassengers);
+            fareBreakup.put("Total Fare", totalFare);
+            return fareBreakup;
+
+    }
+
+
 }

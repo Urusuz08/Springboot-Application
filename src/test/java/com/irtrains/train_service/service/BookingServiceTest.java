@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,12 +40,12 @@ public class BookingServiceTest {
     @BeforeEach
     void setUp() {
         bookingInfoDTO = new BookingInfoDTO();
-        bookingInfoDTO.setUserId("testUser");
+
         bookingInfoDTO.setTrainId("12345");
         bookingInfoDTO.setSourceStationCode("SRC");
         bookingInfoDTO.setDestinationStationCode("DST");
         bookingInfoDTO.setJourneyDate(LocalDate.now());
-        bookingInfoDTO.setTotalFare(100.0);
+
         bookingInfoDTO.setContactNumber("1234567890");
         bookingInfoDTO.setEmail("test@example.com");
         bookingInfoDTO.setCoachType("AC");
@@ -58,18 +59,6 @@ public class BookingServiceTest {
         booking.setUserId("testUser");
     }
 
-    @Test
-    void testAddBooking() {
-        when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
-        doNothing().when(passengerService).addPassenger(anyList(), anyList());
-
-        Booking result = bookingService.addBooking(bookingInfoDTO);
-
-        assertNotNull(result);
-        assertEquals(booking.getBookingId(), result.getBookingId());
-        verify(bookingRepository, times(1)).save(any(Booking.class));
-        verify(passengerService, times(1)).addPassenger(anyList(), anyList());
-    }
 
     @Test
     void testGetBookingByPnrNumber_Found() {

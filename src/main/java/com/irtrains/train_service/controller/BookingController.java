@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -40,7 +40,8 @@ public class BookingController {
     @PostMapping //Used to create a new booking
     public ResponseEntity<?> createBooking(@RequestBody BookingInfoDTO booking) {
         try {
-            Booking createdBooking = bookingService.addBooking(booking);
+            Map<String,Object> createdBooking = bookingService.addBooking(booking);
+
             return ResponseEntity.status(HttpStatus.CREATED).body(createdBooking);
         } catch (Exception e) {
             return error(HttpStatus.BAD_REQUEST, "Failed to create booking", e);

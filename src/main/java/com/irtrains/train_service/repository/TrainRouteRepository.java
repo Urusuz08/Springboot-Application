@@ -2,6 +2,7 @@ package com.irtrains.train_service.repository;
 
 import com.irtrains.train_service.model.trainRoute;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalTime;
@@ -18,6 +19,15 @@ public interface TrainRouteRepository extends JpaRepository<trainRoute, Integer>
     List<trainRoute> findByStationCode(String stationCode);
 
     List<trainRoute> findByPlace(String place);
+
+    @Query("""
+            SELECT tr2.distanceFromSource - tr1.distanceFromSource as distance
+            FROM trainRoute tr1 JOIN trainRoute tr2 ON tr1.trainId=tr2.trainId
+            WHERE tr1.stationCode = :sourceStationCode
+            AND tr2.stationCode = :destinationStationCode
+            AND tr1.trainId = :trainId
+            """)
+    int distance(String trainId, String sourceStationCode, String destinationStationCode);
 
     List<trainRoute> findByArrivalTime(LocalTime arrivalTime);
 
