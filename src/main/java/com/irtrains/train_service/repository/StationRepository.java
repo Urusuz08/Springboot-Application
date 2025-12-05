@@ -23,6 +23,9 @@ public interface StationRepository extends JpaRepository<Station, String> {
     @Query("SELECT s FROM Station s WHERE s.code = :stationCode")
     Station findByStationCode(String stationCode);
 
+    @Query("SELECT s.name FROM Station s WHERE s.code=:stationCode")
+    String stationName(String stationCode);
+
     Optional<Station> findByName(String name);
 
     boolean existsByName(String name);

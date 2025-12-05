@@ -6,6 +6,7 @@ import com.irtrains.train_service.model.enums.Type;
 import com.irtrains.train_service.model.*;
 import com.irtrains.train_service.repository.*;
 import com.irtrains.train_service.DTO.*;
+import com.irtrains.train_service.service.*;
 
 import org.apache.commons.csv.*;
 import org.springframework.cache.annotation.*;
@@ -36,10 +37,12 @@ public class trainService {
     private final StationRepository stationRepository;
     private final FareClassRateRepo fareClassRateRepo;
     private final FareRuleSetRepo fareRuleSetRepo;
+    private final BookingService   bookingService;
 
     public trainService(TrainRepository trainRepository,TrainCoachRepository trainCoachRepository,
                         TrainRouteRepository trainRouteRepository, SeatAvailabilityRepository seatAvailabilityRepository,
-                        StationRepository stationRepository, FareClassRateRepo fareClassRateRepo, FareRuleSetRepo fareRuleSetRepo) {
+                        StationRepository stationRepository, FareClassRateRepo fareClassRateRepo, FareRuleSetRepo fareRuleSetRepo,
+                        BookingService bookingService) {
         this.trainRepository = trainRepository;
         this.trainRouteRepository = trainRouteRepository;
         this.fareClassRateRepo=fareClassRateRepo;
@@ -47,6 +50,7 @@ public class trainService {
         this.seatAvailabilityRepository = seatAvailabilityRepository;
         this.trainCoachRepository = trainCoachRepository;
         this.stationRepository = stationRepository;
+        this.bookingService= bookingService;
     }
 
 
@@ -393,7 +397,7 @@ public class trainService {
     }
 
     @Cacheable(value = "trains", key = "#source + '-' + #destination + '-' + #dateOfJourney.toString()")
-    public List<train> findTrains(String source, String destination, LocalDate dateOfJourney) {
+    public List<TrainInfoDTO> findTrains(String source, String destination, LocalDate dateOfJourney) {
 
         System.out.println("Fetching from DB for " + source + " to " + destination + " on " + dateOfJourney.toString());
         List<train> trains=new ArrayList<>();
@@ -443,9 +447,138 @@ public class trainService {
 
             }
         }
+        List<TrainInfoDTO> result=new ArrayList<>();
+        for(train a:trains){
 
-        return trains;
+            String srcCode=trainRouteRepository.stationCode(a.getTrainId(),src.getPlace());
+            String destCode=trainRouteRepository.stationCode(a.getTrainId(),dest.getPlace());
+
+            TrainInfoDTO trainInfoDTO=new TrainInfoDTO();
+            trainInfoDTO.setTrainNumber(a.getTrainId());
+            trainInfoDTO.setTrainName(a.getName());
+            trainInfoDTO.setTrainType(a.getType().toString());
+
+            List<String> coaches=seatAvailabilityRepository.getCoachTypes(a.getTrainId());
+            Map<String,Double> coachFareMap=new HashMap<>();
+            for(String coach:coaches){
+                double totalFare= calculateTotalFare(a.getTrainId(),srcCode,destCode,coach,1);
+                coachFareMap.put(coach,totalFare);
+            }
+            trainInfoDTO.setTotalFare(coachFareMap);
+
+            Map<String, Integer> availableSeatsMap=new HashMap<>();
+            for(String coach:coaches){
+                int availableSeats=seatAvailabilityRepository.availableSeats(a.getTrainId(),dateOfJourney,coach);
+                availableSeatsMap.put(coach,availableSeats);
+            }
+            Map<LocalDate, Map<String, Integer>> dateWiseAvailability=new HashMap<>();
+            dateWiseAvailability.put(dateOfJourney,availableSeatsMap);
+            trainInfoDTO.setAvailableSeatsMap(dateWiseAvailability);
+
+
+
+
+
+            trainInfoDTO.setSourceStationCode(srcCode);
+            trainInfoDTO.setSourceStationName(stationRepository.stationName(srcCode));
+
+            trainInfoDTO.setDestinationStationCode(destCode);
+            trainInfoDTO.setDestinationStationName(stationRepository.stationName(destCode));
+
+            trainInfoDTO.setDepartureTimeFromSource(trainRouteRepository.departureTime(a.getTrainId(),srcCode));
+            trainInfoDTO.setArrivalTimeOnDestination(trainRouteRepository.arrivalTime(a.getTrainId(),destCode));
+
+            Map<String,Integer> durationMap=calculateTravelDuration(a.getTrainId(),srcCode,destCode);
+
+            trainInfoDTO.setTravelDuration(durationMap);
+
+            trainInfoDTO.setJourneyDate(dateOfJourney);
+
+            LocalDate arrivalDate=dateOfJourney.plusDays(trainRouteRepository.dayNumber(a.getTrainId(),destCode)-trainRouteRepository.dayNumber(a.getTrainId(),srcCode));
+            trainInfoDTO.setArrivalDate(arrivalDate);
+
+
+            List<trainRoute> routeDetails=trainRouteRepository.findByTrainIdOrderByDayNumber(a.getTrainId());
+
+            List<TrainRouteDTO> routeDTOs=new ArrayList<>();
+            for(trainRoute route: routeDetails){
+                TrainRouteDTO routeDTO=new TrainRouteDTO();
+                routeDTO.setStationCode(route.getStationCode());
+                routeDTO.setSequence(route.getSequence());
+                routeDTO.setArrivalTime(route.getArrivalTime());
+                routeDTO.setDepartureTime(route.getDepartureTime());
+                routeDTO.setDayNumber(route.getDayNumber());
+                routeDTO.setDistanceFromSource(route.getDistanceFromSource());
+                routeDTOs.add(routeDTO);
+            }
+
+            trainInfoDTO.setTrainRoute(routeDTOs);
+
+            trainInfoDTO.setDaysOfOperation(getDaysOfOperation(a.getTrainId()));
+
+
+            //this payload configuration is completed now next time
+            // when u come please do check that u resolve the errors.
+            result.add(trainInfoDTO);
+        }
+
+        return result;
     }
+
+    //Helper Function to calculate the travel duration
+    public Map<String, Integer> calculateTravelDuration(String trainId, String sourceStationCode, String destinationStationCode){
+            LocalTime departureTimeAtSource= trainRouteRepository.departureTime(trainId, sourceStationCode);
+            LocalTime arrivalTimeAtDestination= trainRouteRepository.arrivalTime(trainId, destinationStationCode);
+
+            int dayAtSource= trainRouteRepository.dayNumber(trainId, sourceStationCode);
+            int dayAtDestination= trainRouteRepository.dayNumber(trainId, destinationStationCode);
+
+            Duration duration;
+
+            if(dayAtDestination==dayAtSource){
+                duration= Duration.between(departureTimeAtSource,arrivalTimeAtDestination);
+            }
+            else{
+                duration= Duration.between(departureTimeAtSource,arrivalTimeAtDestination.plusHours(24*(dayAtDestination-dayAtSource)));
+            }
+
+            long hours= duration.toHours();
+            long minutes= duration.toMinutesPart();
+
+            Map<String,Integer> travelDuration=new HashMap<>();
+            travelDuration.put("hours",(int)hours);
+            travelDuration.put("minutes",(int)minutes);
+
+            return travelDuration;
+    }
+
+    //helper function to calculate the totalFare for a journey
+    public double calculateTotalFare(String trainId, String sourceStationCode, String destinationStationCode, String classType, int numOfPassengers){
+            int distance= trainRouteRepository.distance(trainId, sourceStationCode, destinationStationCode);
+
+            Map<String,Object> fareBreakup= bookingService.calculateFare(classType, 1, distance);
+
+            return (double) fareBreakup.get("Total Fare");
+    }
+
+    //helper function to get days of operation
+    public List<Boolean> getDaysOfOperation(String trainId){
+        Optional<train> t=trainRepository.findById(trainId);
+        List<Boolean> daysOfOperation=new ArrayList<>();
+        if(t.isPresent()){
+            train temp=t.get();
+            daysOfOperation.add(temp.isMonday());
+            daysOfOperation.add(temp.isTuesday());
+            daysOfOperation.add(temp.isWednesday());
+            daysOfOperation.add(temp.isThursday());
+            daysOfOperation.add(temp.isFriday());
+            daysOfOperation.add(temp.isSaturday());
+            daysOfOperation.add(temp.isSunday());
+        }
+        return daysOfOperation;
+    }
+
+    //Helper Function to check if train runs on a particular day
     public boolean runsOnDay(train t, String dayOfWeek) {
 //
 

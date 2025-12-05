@@ -29,6 +29,23 @@ public interface TrainRouteRepository extends JpaRepository<trainRoute, Integer>
             """)
     int distance(String trainId, String sourceStationCode, String destinationStationCode);
 
+    @Query("""
+    SELECT tr.stationCode from trainRoute tr 
+    WHERE tr.trainId=:trainId AND tr.place=:place
+        ORDER BY tr.sequence ASC LIMIT 1
+
+    """)
+    String stationCode(String trainId, String place);
+
+    @Query("SELECT tr.arrivalTime from trainRoute tr WHERE tr.trainId=:trainId AND tr.stationCode=:stationCode")
+    LocalTime arrivalTime(String trainId, String stationCode);
+
+    @Query("SELECT tr.departureTime from trainRoute tr WHERE tr.trainId=:trainId AND tr.stationCode=:stationCode")
+    LocalTime departureTime(String trainId, String stationCode);
+
+    @Query("SELECT tr.dayNumber from trainRoute tr WHERE tr.trainId=:trainId AND tr.stationCode=:stationCode")
+    int dayNumber(String trainId, String stationCode);
+
     List<trainRoute> findByArrivalTime(LocalTime arrivalTime);
 
     List<trainRoute> findByDepartureTime(LocalTime departureTime);

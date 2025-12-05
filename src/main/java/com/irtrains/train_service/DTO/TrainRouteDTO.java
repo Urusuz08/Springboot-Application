@@ -4,7 +4,7 @@ import java.time.LocalTime;
 
 public class TrainRouteDTO {
         private String stationCode;
-//        private Integer sequence; // Order of the station in the route
+        private Integer sequence; // Order of the station in the route
         private LocalTime arrivalTime; // Format: "HH:mm"
         private LocalTime departureTime; // Format: "HH:mm"
         private Integer dayNumber; // e.g., 1 for first day, 2 for second day
@@ -18,14 +18,14 @@ public class TrainRouteDTO {
             this.stationCode = stationCode;
         }
 
-        /*public Integer getSequence() {
+        public Integer getSequence() {
             return sequence;
         }
 
-//        public void setSequence(Integer sequence) {
-//            this.sequence = sequence;
-//        }
-                */
+        public void setSequence(Integer sequence) {
+            this.sequence = sequence;
+        }
+
 
         public LocalTime getArrivalTime() {
             return arrivalTime;
