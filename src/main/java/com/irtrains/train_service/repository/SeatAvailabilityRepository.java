@@ -18,10 +18,16 @@ public interface SeatAvailabilityRepository extends JpaRepository<trainSeatAvail
     trainSeatAvailability findByTrainIdAndCoachId(String trainId, String coachId);
 
     @Query("""
+        SELECT DISTINCT sa.dateOfJourney from trainSeatAvailability sa
+        ORDER BY sa.dateOfJourney DESC LIMIT 1
+    """)
+    LocalDate findLatestDateOfJourney();
+
+    @Query("""
         SELECT sa.availableSeats from trainSeatAvailability sa 
         WHERE sa.trainId=:trainId AND sa.dateOfJourney=:dateOfJourney AND sa.coachId=:seatType
     """)
-    int availableSeats(String trainId, LocalDate dateOfJourney, String seatType);
+    Integer availableSeats(String trainId, LocalDate dateOfJourney, String seatType);
 
     @Query(
             """

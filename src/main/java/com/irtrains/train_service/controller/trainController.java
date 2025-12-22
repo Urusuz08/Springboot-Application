@@ -8,6 +8,7 @@ import com.irtrains.train_service.model.trainSeatAvailability;
 import com.irtrains.train_service.service.trainService;
 import com.irtrains.train_service.DTO.*;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -247,7 +248,8 @@ public class trainController {
     /* ========================= Route Queries ========================= */
     @GetMapping("/route")
     public ResponseEntity<?> route(@RequestParam("from") String from,
-                                   @RequestParam("to") String to, @RequestParam("date")LocalDate date) {
+                                   @RequestParam("to") String to,
+                                   @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         try {
             return ResponseEntity.ok(trainService.findTrains(from, to, date));
         } catch (Exception ex) {

@@ -30,7 +30,7 @@ public class BookingTest {
         booking.setSourceStationCode("SRC");
         booking.setDestinationStationCode("DST");
         booking.setCoachType("AC");
-        booking.setTravelDate(LocalDate.now().plusDays(1));
+        booking.setJourneyDate(LocalDate.now().plusDays(1));
         booking.setBookingDate(new Date());
         booking.setStatus("CONFIRMED");
         booking.setFare(1000.0);
@@ -77,7 +77,7 @@ public class BookingTest {
         assertEquals("SRC", booking.getSourceStationCode());
         assertEquals("DST", booking.getDestinationStationCode());
         assertEquals("AC", booking.getCoachType());
-        assertNotNull(booking.getTravelDate());
+        assertNotNull(booking.getJourneyDate());
         assertNotNull(booking.getBookingDate());
         assertEquals("CONFIRMED", booking.getStatus());
         assertEquals(1000.0, booking.getFare());

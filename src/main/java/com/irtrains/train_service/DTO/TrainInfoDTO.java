@@ -11,7 +11,7 @@ public class TrainInfoDTO {
     private String trainName;
     private String trainType;
     private List<Boolean> daysOfOperation;
-    private Map<String, Double> totalFare;
+    private Map<String, String> totalFare;
     private String sourceStationCode;
     private String sourceStationName;
     private String destinationStationCode;
@@ -25,8 +25,10 @@ public class TrainInfoDTO {
 
     private Map<String, Integer> travelDuration;
 
-
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate journeyDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate arrivalDate;
 
     private Map<LocalDate,Map<String, Integer>> availableSeatsMap;
@@ -63,11 +65,11 @@ public class TrainInfoDTO {
         this.daysOfOperation = daysOfOperation;
     }
 
-    public Map<String, Double> getTotalFare() {
+    public Map<String, String> getTotalFare() {
         return totalFare;
     }
 
-    public void setTotalFare(Map<String, Double> totalFare) {
+    public void setTotalFare(Map<String, String> totalFare) {
         this.totalFare = totalFare;
     }
 

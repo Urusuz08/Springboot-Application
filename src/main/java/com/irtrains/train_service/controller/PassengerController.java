@@ -34,15 +34,15 @@ public class PassengerController {
         return ResponseEntity.status(status).body(body);
     }
 
-    @PostMapping // Used to add a new passenger
-    public ResponseEntity<?> addPassenger(@RequestBody List<passenger> passenger, List<Booking> existingBookings) {
-        try {
-            List<passenger> createdPassengers = passengerService.addPassenger(passenger,existingBookings );
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdPassengers);
-        } catch (Exception e) {
-            return error(HttpStatus.BAD_REQUEST, "Failed to add passenger", e);
-        }
-    }
+//    @PostMapping // Used to add a new passenger
+//    public ResponseEntity<?> addPassenger(@RequestBody List<passenger> passenger, List<Booking> existingBookings) {
+//        try {
+//            List<passenger> createdPassengers = passengerService.addPassenger(passenger,existingBookings );
+//            return ResponseEntity.status(HttpStatus.CREATED).body(createdPassengers);
+//        } catch (Exception e) {
+//            return error(HttpStatus.BAD_REQUEST, "Failed to add passenger", e);
+//        }
+//    }
 
     @GetMapping("/booking/{bookingId}") // Used to get passengers by booking ID
     public ResponseEntity<?> getPassengersByBookingId(@PathVariable Long bookingId) {

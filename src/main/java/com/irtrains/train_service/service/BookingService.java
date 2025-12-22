@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.irtrains.train_service.interfaces.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -27,10 +28,11 @@ public class BookingService {
     private final FareRuleSetRepo fareRuleSetRepo;
     private final FareClassRateRepo fareClassRateRepo;
     private final UserRepository userRepository;
+    private final PaymentClient paymentClient;
 
     public BookingService(BookingRepository bookingRepository, PassengerService passengerService, SeatAvailabilityRepository seatAvailabilityRepository,
                           FareRuleSetRepo fareRuleSetRepo, FareClassRateRepo fareClassRateRepo, UserRepository userRepository,
-                          TrainRouteRepository trainRouteRepository) {
+                          TrainRouteRepository trainRouteRepository, PaymentClient paymentClient) {
         this.trainRouteRepository = trainRouteRepository;
         this.userRepository = userRepository;
         this.fareRuleSetRepo = fareRuleSetRepo;
@@ -38,6 +40,7 @@ public class BookingService {
         this.bookingRepository = bookingRepository;
         this.seatAvailabilityRepository = seatAvailabilityRepository;
         this.passengerService = passengerService;
+        this.paymentClient = paymentClient;
     }
 
     @Transactional
@@ -57,7 +60,7 @@ public class BookingService {
         newBooking.setTrainId(booking.getTrainId());
         newBooking.setSourceStationCode(booking.getSourceStationCode());
         newBooking.setDestinationStationCode(booking.getDestinationStationCode());
-        newBooking.setTravelDate(booking.getJourneyDate());
+        newBooking.setJourneyDate(booking.getJourneyDate());
 
         int distance = trainRouteRepository.distance(booking.getTrainId(), booking.getSourceStationCode(), booking.getDestinationStationCode());
         Map<String, Object> fareDetails = calculateFare(booking.getCoachType(), booking.getPassengers().size(),
@@ -98,10 +101,11 @@ public class BookingService {
         Map<String,Object> response=new HashMap<>();
         response.put("booking", savedBooking);
 
-        passengerService.addPassengerM(passengerList, existingBookings,booking.getTrainId(),booking.getCoachType(),tempList,response);
+        passengerService.addPassengerM(passengerList,tempList,response);
 //fix the persist error in train_coach table, which JPA is unable to do it and because of it we are not able to create the entry in the train_coach table through the api.
         return response;
     }
+
     @Transactional
     public Booking createBooking(Booking booking) {
         // Generate PNR, set booking date, and status
@@ -121,6 +125,7 @@ public class BookingService {
                 .orElseThrow(() -> new RuntimeException("Booking not found with PNR number: " + pnrNumber));
     }
 
+
     public List<Booking> getBookingsByUserId(String userId) {
         return bookingRepository.findByUserId(userId);
     }
@@ -133,8 +138,13 @@ public class BookingService {
     }
 
     @Transactional
-    public void cancelBooking(String pnrNumber) {
-        updateBookingStatus(pnrNumber, "CANCELLED");
+    public Booking cancelBooking(String pnrNumber) {
+        Booking booking = getBookingByPnrNumber(pnrNumber);
+        booking.setStatus("CANCELLED");
+        return bookingRepository.save(booking);
+
+        // Notify payment service for refund
+
     }
 
     //helper function to calculate fare

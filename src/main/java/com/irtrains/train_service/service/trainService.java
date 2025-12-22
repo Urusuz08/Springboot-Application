@@ -8,6 +8,8 @@ import com.irtrains.train_service.repository.*;
 import com.irtrains.train_service.DTO.*;
 import com.irtrains.train_service.service.*;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.apache.commons.csv.*;
 import org.springframework.cache.annotation.*;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -15,6 +17,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
@@ -59,6 +63,9 @@ public class trainService {
 
         List<train> trains=trainRepository.findAll();
         List<trainSeatAvailability> sA=new ArrayList<>();
+
+        LocalDate lastUpdate = seatAvailabilityRepository.findLatestDateOfJourney();
+
         for(int i=0;i<trains.size();i++){
             String trainId=trains.get(i).getTrainId();
             List<train_coaches> coaches=trainCoachRepository.findByTrainId(trainId);
@@ -74,11 +81,18 @@ public class trainService {
                 trainSeatAvailability seatAvailability=new trainSeatAvailability();
                 seatAvailability.setTrainId(trainId);
                 seatAvailability.setCoachId(a);
-                seatAvailability.setDateOfJourney(LocalDate.now());
                 seatAvailability.setAvailableSeats(helper.get(a));
                 seatAvailability.setTotalSeats(helper.get(a));
-                seatAvailability.setLastUpdated(System.currentTimeMillis());
-                sA.add(seatAvailability);
+                for(LocalDate m=lastUpdate;m.isBefore(LocalDate.now().plusDays(60));m=m.plusDays(1)){
+                    trainSeatAvailability seatAvailabilityDate;
+
+                    seatAvailabilityDate=seatAvailability;
+                    seatAvailabilityDate.setDateOfJourney(m);
+                    seatAvailabilityDate.setLastUpdated(System.currentTimeMillis());
+                    sA.add(seatAvailabilityDate);
+                }
+
+
             }
         }
         return seatAvailabilityRepository.saveAll(sA);
@@ -459,17 +473,18 @@ public class trainService {
             trainInfoDTO.setTrainType(a.getType().toString());
 
             List<String> coaches=seatAvailabilityRepository.getCoachTypes(a.getTrainId());
-            Map<String,Double> coachFareMap=new HashMap<>();
+            Map<String,String> coachFareMap=new HashMap<>();
             for(String coach:coaches){
                 double totalFare= calculateTotalFare(a.getTrainId(),srcCode,destCode,coach,1);
-                coachFareMap.put(coach,totalFare);
+                coachFareMap.put(coach,String.format("%.2f", totalFare));
             }
             trainInfoDTO.setTotalFare(coachFareMap);
 
             Map<String, Integer> availableSeatsMap=new HashMap<>();
             for(String coach:coaches){
-                int availableSeats=seatAvailabilityRepository.availableSeats(a.getTrainId(),dateOfJourney,coach);
-                availableSeatsMap.put(coach,availableSeats);
+                Integer availableSeats=seatAvailabilityRepository.availableSeats(a.getTrainId(),dateOfJourney,coach);
+                int actualSeats= (availableSeats!=null )? availableSeats : 0;
+                availableSeatsMap.put(coach,actualSeats);
             }
             Map<LocalDate, Map<String, Integer>> dateWiseAvailability=new HashMap<>();
             dateWiseAvailability.put(dateOfJourney,availableSeatsMap);
@@ -533,16 +548,18 @@ public class trainService {
             int dayAtSource= trainRouteRepository.dayNumber(trainId, sourceStationCode);
             int dayAtDestination= trainRouteRepository.dayNumber(trainId, destinationStationCode);
 
-            Duration duration;
+        LocalDateTime startDateTime = LocalDate.now().plusDays(dayAtSource - 1).atTime(departureTimeAtSource);
+        LocalDateTime endDateTime = LocalDate.now().plusDays(dayAtDestination - 1).atTime(arrivalTimeAtDestination);
 
-            if(dayAtDestination==dayAtSource){
-                duration= Duration.between(departureTimeAtSource,arrivalTimeAtDestination);
-            }
-            else{
-                duration= Duration.between(departureTimeAtSource,arrivalTimeAtDestination.plusHours(24*(dayAtDestination-dayAtSource)));
-            }
+        // Ensure endDateTime is after startDateTime for overnight journeys within the same 'dayNumber'
+        if (endDateTime.isBefore(startDateTime)) {
+            endDateTime = endDateTime.plusDays(dayAtDestination - dayAtSource + 1);
+        }
 
-            long hours= duration.toHours();
+        Duration duration = Duration.between(startDateTime, endDateTime);
+
+
+        long hours= duration.toHours();
             long minutes= duration.toMinutesPart();
 
             Map<String,Integer> travelDuration=new HashMap<>();
@@ -611,6 +628,8 @@ public class trainService {
         if (term == null || term.isBlank()) return List.of();
         return trainRepository.searchByNameOrId(term.trim());
     }
+
+
 
     /* ===================== Existence ===================== */
     public boolean existsByName(String name) {
