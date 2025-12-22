@@ -1,6 +1,7 @@
 package com.irtrains.user_service.repository;
 
 import com.irtrains.user_service.model.Admin;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -8,6 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface AdminRepository extends JpaRepository<Admin, Long>{
+    @Cacheable(value = "admin", key = "#username")
     Optional<Admin> findByUsername(String username);
     Optional<Admin> findByEmail(String email);
     Optional<Admin> findByPhone(Long phone);

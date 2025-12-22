@@ -21,13 +21,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 @EnableJpaRepositories(
         basePackages = {
                 // Include BOTH station and train repositories
-                "com.irtrains.train_service.repository.station",
-                "com.irtrains.train_service.repository.train",
-                "com.irtrains.train_service.repository.seatAvailabilityRepository",
-                "com.irtrains.train_service.repository.train_coach",
-                "com.irtrains.train_service.repository.Booking",
-                "com.irtrains.train_service.repository.passenger",
-                "com.irtrains.train_service.repository.trainRoute"
+                "com.irtrains.train_service.repository"
         },
         entityManagerFactoryRef = "trainEntityManagerFactory",
         transactionManagerRef = "trainTransactionManager"
@@ -65,14 +59,8 @@ public class TrainDataSourceConfig {
         return builder
                 .dataSource(dataSource)
                 .packages(
-                        "com.irtrains.train_service.model.station",
-                        "com.irtrains.train_service.model.train",
-                        "com.irtrains.train_service.model.enums",
-                        "com.irtrains.train_service.model.trainSeatAvailability",
-                        "com.irtrains.train_service.model.train_coaches",
-                        "com.irtrains.train_service.model.booking",
-                        "com.irtrains.train_service.model.passenger",
-                        "com.irtrains.train_service.model.train_route"
+
+                        "com.irtrains.train_service.model"
                 )
                 .persistenceUnit("train")
                 .build();

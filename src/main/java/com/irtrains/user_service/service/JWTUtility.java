@@ -23,6 +23,7 @@ public class JWTUtility {
         // Simplified payload (you'd add roles/authorities here)
         return Jwts.builder()
                 .setSubject(authentication.getUsername())
+                .claim("role", authentication.getType())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)

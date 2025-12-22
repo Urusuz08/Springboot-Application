@@ -4,7 +4,9 @@ import com.irtrains.user_service.config.user.SecurityConfig;
 import com.irtrains.user_service.model.*;
 import com.irtrains.user_service.repository.*;
 import com.irtrains.user_service.DTO.*;
-import com.irtrains.user_service.config.user.SecurityConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,6 +28,8 @@ public class UserService implements UserDetailsService {
         this.adminRepository = adminRepository;
         this.passwordEncoder = passwordEncoder;
     }
+
+
 
     @Transactional
     public User create(UserDTO user){
